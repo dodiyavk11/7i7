@@ -1,0 +1,193 @@
+* {
+  margin: 0%;
+  padding: 0%;
+  font-family: 'Roboto', sans-serif;
+  color: white;
+
+}
+
+.admin-container {
+  width: 20%;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-sidebar {
+  height: 125vh !important;
+  transition: all 0.5s;
+  position: sticky !important;
+  top: 0;
+  background-color: rgba(178, 185, 185, 0.1);
+}
+
+.navigation-links {
+  height: auto;
+  width: 96%;
+  margin: 2% auto;
+  border-radius: 10px;
+  z-index: 1;
+  position: relative;
+}
+
+.admin-top-section {
+  display: flex;
+  align-items: center;
+
+}
+
+.admin-logo {
+  text-align: center;
+  padding: 50px;
+
+}
+
+.admin-img {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.admin-img img {
+  width: 50% !important;
+}
+
+
+.admin-link {
+  display: flex;
+  padding: 15px 15px;
+  gap: 15px;
+  transition: all 0.5s;
+  width: 80%;
+  margin: 3% auto;
+  border-radius: 10px;
+  background-color: rgba(178, 185, 185, 0.1);
+  text-decoration: none;
+}
+
+img,
+svg {
+  vertical-align: initial;
+}
+
+.admin-link-text {
+  font-size: 18px;
+
+}
+
+.admin-icon {
+  font-size: 20px;
+}
+
+.admin-active {
+  border: 1px solid white;
+}
+
+.admin-End {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+}
+
+.admin-end-text {
+  position: absolute !important;
+  bottom: 0% !important;
+
+}
+
+/* media-query  */
+
+
+@media (max-width : 480px) {
+  .admin-logo {
+    height: 50px;
+    width: 70%;
+  }
+
+  .admin-link {
+    padding: 15px 8px;
+    width: 50%;
+  }
+
+  .admin-link-text {
+    display: none;
+  }
+
+  .admin-icon {
+    font-size: 20px;
+
+  }
+
+  .admin-logo {
+    margin: auto;
+    height: 70px;
+    width: 70% !important;
+    padding: 10px;
+  }
+
+}
+
+@media only screen and (min-width:480px) and (max-width : 576px) {
+  .admin-link {
+    padding: 15px 15px;
+    width: 50%;
+
+  }
+
+  .admin-link-text {
+    display: none;
+  }
+
+  .admin-icon {
+    font-size: 20px;
+
+  }
+
+  .admin-logo {
+    margin: auto;
+    height: 70px;
+    width: 70% !important;
+    padding: 10px;
+  }
+}
+
+@media only screen and (min-width:576px) and (max-width : 768px) {
+  .admin-link {
+    padding: 15px 20px;
+    width: 50%;
+
+  }
+}
+
+@media only screen and (max-width : 992px) {
+
+  .admin-sidebar {
+    width: 100% !important;
+    height: 100vh !important;
+  }
+
+  .admin-link {
+    display: flex;
+    justify-content: center;
+    width: 50%;
+  }
+
+  .text-center {
+    font-size: 10px;
+  }
+
+  .admin-logo {
+    margin: auto;
+    height: 70px;
+    width: 70%;
+    padding: 10px;
+  }
+
+  .admin-link-text {
+    display: none;
+  }
+
+  .admin-icon {
+    font-size: 20px;
+    align-items: center;
+  }
+
+}

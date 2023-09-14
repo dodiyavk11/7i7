@@ -1,0 +1,49 @@
+
+
+.dashboard {
+  height: auto;
+
+  width: 80%;
+}
+
+.dashboard .big {
+  width: 40%;
+}
+
+.dashboard .small {
+  width: 15%;
+}
+div#dashboarddata > div  {
+  border-radius: 0 !important;
+}
+ div#dashboarddata > div > div > div > div > div {
+  background-color:rgba(178, 185, 185, 0.1);
+  margin: 10px 0px;
+  cursor: pointer;
+  /* border-radius: 2px; */
+}
+div#dashboarddata >div{
+  border-top-left-radius:10px !important;
+  border-top-right-radius: 10px !important;
+}
+div#dashboarddata > div > div > div > div{
+  background-color:rgba(178, 185, 185, 0.1)  !important;
+  cursor: pointer;
+  /* border-radius: 5px; */
+}
+.rdt_TableCell {
+  padding: 15px  5px;
+  }
+  .rdt_TableHeadRow {
+    background: transparent !important;
+    border-color: grey !important;
+}
+
+svg {
+  fill: white;
+}
+.warninng{
+  font-size: 25px;
+  font-weight: bolder;
+  color: red;
+  }

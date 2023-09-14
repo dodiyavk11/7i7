@@ -1,0 +1,12 @@
+.template-btn {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.order-content1 {
+    background-color: rgba(178, 185, 185, 0.1);
+    margin-top: 20px;
+    border-radius: 10px;
+    color: white;
+}

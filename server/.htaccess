@@ -1,0 +1,19 @@
+DirectoryIndex ""
+ AllowOverride All
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^.*/index.*
+RewriteRule ^(.*)$ http://127.0.0.1:8000/ [P,L]
+ 
+RewriteRule ^$ http://127.0.0.1:8000/ [P,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ http://127.0.0.1:8000/$1 [P,L]
+
+# <IfModule mod_rewrite.c>
+#      RewriteEngine on
+
+#      RewriteCond% {REQUEST_URI}! / (View) / [NC]
+#      RewriteCond% {REQUEST_FILENAME}!-F
+#      RewriteRule ^ (. *) $ Index.html [L, QSA]
+
+# </IfModule>

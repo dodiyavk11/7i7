@@ -1,0 +1,229 @@
+.Neworder {
+  width: 100%;
+}
+
+.header {
+  width: 100%;
+}
+
+.order-field {
+  margin: 0 auto;
+  width: 100%;
+  padding: 1% 0%;
+}
+
+.file-area-border {
+  border: 1px dashed grey;
+}
+
+.file-btn {
+  margin-top: 1%;
+}
+
+.msg {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.chat-box {
+  height: auto;
+  margin-top: 1%;
+}
+
+.chat-box-one {
+  width: 100%;
+  background-color: #005c4b;
+  border-radius: 3px;
+  border: none;
+  padding: 10px;
+}
+
+.chat-one {
+  overflow-x: scroll;
+  height: 70px;
+}
+
+.view-order-img {
+  height: 50px;
+  width: 80px;
+  margin-top: 10px;
+}
+
+.msg-profile {
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: aliceblue;
+}
+
+.chat-box-two {
+  width: 100%;
+
+  height: auto;
+  background-color: #202c33;
+  padding: 10px;
+  color: white !important;
+  border-radius: 3px;
+  border: none;
+
+
+}
+
+.chat-box-one,
+.chat-box-two:focus {
+  outline: none;
+}
+
+.chat-box-two {
+  height: auto;
+}
+
+.downloadbtn,.editbtn
+.deletebtn {
+  background-color: #C0DE6020;
+
+
+  padding: 5px 40px;
+  width: auto;
+  
+
+  border: none;
+  outline: none;
+
+  border-radius: 2px;
+  letter-spacing: 0.3px;
+
+
+}
+
+.cloud-link-download-btn{
+  display: flex;
+  align-items: center;
+  gap:5px;
+  padding: 5px 10px;
+  width: 100%;
+  /* min-width: 1095px;  */
+  /* max-width: 1095px; */
+  /* width: 70%; */
+}
+.linkinput.col-8{
+  
+  min-width: 1095px;
+}
+
+.cloud-link-download-btn > a{
+  overflow-x: auto;
+ }
+
+.date {
+  font-size: 10px;
+  padding: 2px;
+}
+
+.deletebtn {
+  background-color: #DE606020;
+
+
+}
+.display-contents {
+  display: contents;
+}
+
+.editbtn {
+  background-color: #c0de6020;
+}
+
+.bi-emoji-smile::before {
+  content: "\f327";
+ 
+}
+.main-chat-box {
+  border: 1px solid #DE6060;
+}
+
+.main-chat {
+  height: 200px;
+  overflow-x: scroll;
+  width: 100%;
+  margin-top: 20px;
+
+
+}
+
+.chat-date {
+  height: 10px;
+  font-size: 10px;
+}
+
+.chat-text {
+  height: 20px;
+}
+
+
+.custom-scrollbar {
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+/* Target the scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  height: 3px;
+}
+
+/* Target the thumb of the scrollbar */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgb(131, 162, 116);
+  border-radius: 8px;
+  height: 2px;
+}
+
+/* Target the track of the scrollbar */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f2f2f223;
+}
+
+.chat-box-one.u1{
+  float: left;
+  clear: both;
+  border-top-left-radius: 0px;
+  background: #005c4b;
+  border-radius: 7.5px;
+}
+.chat-box-one.u1:before{
+  content: "";
+  width: 0px;
+  height: 0px;
+  display: block;
+  border-left: 10px solid transparent;
+  border-right: 10px solid #005c4b;
+  border-top: 10px solid #005c4b;
+  border-bottom: 10px solid transparent;
+  position: relative;
+  bottom: 10px;
+  left: -2%;
+}
+
+.chat-box-two.u2{
+  float: right;
+  clear: both;
+  border-top-right-radius: 0px;
+  background: #202c33;
+  border-radius: 7.5px;
+}
+.chat-box-two.u2:before{
+  content: "";
+  width: 0px;
+  height: 0px;
+  display: block;
+  border-left: 10px solid #202c33;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #202c33;
+  border-bottom: 10px solid transparent;
+  position: relative;
+  bottom: 10px;
+  left: 100%;
+}

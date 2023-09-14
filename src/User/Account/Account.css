@@ -1,0 +1,169 @@
+.account {
+  width: 100%;
+}
+
+.cost-b {
+  width: 30%;
+}
+
+.payment-field {
+  padding-left: 0%;
+}
+
+.account-table {
+  width: 50%;
+
+}
+
+.account-downloadbtn {
+  background-color: rgba(122, 212, 83, 0.311);
+  padding: 0.5% 2%;
+}
+
+.account-table td {
+  padding: 1% 3%;
+}
+
+.file-area {
+  position: relative;
+}
+
+.user-update-payment {
+  background-color: rgb(101, 100, 100);
+
+  border-radius: 3px;
+  padding: 0.5% 2%;
+}
+
+.pause {
+  border-radius: 3px;
+  background-color: rgb(101, 100, 100);
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0px 2% 0% 2%;
+
+}
+
+.resume {
+  border-radius: 3px;
+
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  background-color: rgb(11, 166, 228);
+  padding: 0px 2% 0% 2%;
+
+}
+
+.cancle-plan {
+  background-color: brown;
+  border-radius: 3px;
+
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0px 2% 0% 2%;
+
+}
+
+.file-area input[type=file] {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* opacity: 0; */
+  cursor: pointer;
+}
+
+.profile-input {
+  width: 100%;
+  line-height: 35px;
+
+
+  text-align: center;
+
+}
+
+.success {
+  display: none;
+}
+
+.payment-method {
+
+  margin: auto;
+}
+
+.card {
+
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 2em;
+  width: min(500px, 90%);
+  padding: 1em;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 2px gray;
+}
+
+.form-container>* {
+  padding: 1em;
+}
+
+.err-message {
+  color: #f00;
+}
+
+.submit-button {
+  width: fit-content;
+  margin: auto;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: green;
+}
+
+.des {
+  height: 80px;
+  width: 100%;
+  border-radius: 5px;
+  overflow-y: auto;
+  background-color: rgba(178, 185, 185, 0.1)
+}
+
+.payment-field1 {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center
+}
+
+.main_payment_invoice {
+  position: relative;
+}
+
+.pro_names {
+  position: absolute;
+  left: 20%;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.name_product {
+  padding-top: 12px;
+}
+
+.product_setect .product_option {
+  background-color: #353535 !important;
+}

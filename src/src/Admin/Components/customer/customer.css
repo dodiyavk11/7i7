@@ -1,0 +1,49 @@
+.customer-header {
+    background-color: rgba(178, 185, 185, 0.1);
+    display: flex;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    color: white;
+}
+
+@media screen and (max-width:520px) {
+    .customer-header h3 {
+        font-size: 15px !important;
+        margin-left: 10px !important;
+    }
+
+    .customer-header .order-btn {
+        font-size: 10px !important;
+    }
+}
+
+.customer-header h3 {
+    margin-left: 20px;
+    padding-top: 8px;
+    font-weight: 550;
+}
+
+
+.customer-body {
+    background-color: rgba(178, 185, 185, 0.1);
+    height: auto !important;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-radius: 10px;
+    color: white !important;
+}
+
+.table {
+    color: white !important;
+}
+
+td {
+    border: none !important;
+}
+
+.jfGrJD.Quit,
+.jfGrJD.Active,
+.jfGrJD.Pause {
+    padding: 10px 10px 10px 10px !important;
+}

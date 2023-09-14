@@ -1,0 +1,57 @@
+/* scroll */
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 2px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.no-access-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  font-size: 20px;
+}
+
+.no-access {
+  text-align: center;
+  font-size: 40px;
+}
+
+.page {
+  background-color: rgba(178, 185, 185, 0.1);
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.btn-click {
+  background-color: rgb(174, 235, 54);
+  height: 40px;
+  width: auto;
+  font-size: 20px;
+  border-radius: 2px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}

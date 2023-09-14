@@ -1,0 +1,63 @@
+.employee-header{
+    background-color: rgba(178, 185, 185, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    color: white;
+}
+
+.employee-header h3{
+    margin-left: 20px;
+    padding-top: 8px;
+    font-weight: 550;
+}
+
+
+@media screen and (max-width:520px) {
+  .employee-header h3{
+      font-size: 15px !important;
+      margin-left: 10px !important;
+  }
+  .employee-header .order-btn{
+      font-size: 10px !important;
+  }
+}
+.employee-body{
+    background-color: rgba(178, 185, 185, 0.1);
+    height: auto !important;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-radius: 10px;
+    color: white !important;
+}
+
+.table{
+    color: white !important;
+}
+td{
+    border: none !important;
+}
+
+
+
+/* div#admin-dashboarddata > div > div > div > div > div {
+    
+    background-color: rgba(178, 185, 185, 0.1)  !important;
+
+    margin: 10px 0px;
+  }
+  .rdt_TableCell {
+    background-color: rgba(178, 185, 185, 0.1)  !important;
+    padding: 25px  5px;
+    }
+  .rdt_TableHead{
+    background-color: rgba(178, 185, 185, 0.1)  !important;
+    padding: 5px 20px;
+  }
+  .rdt_TableBody{
+    background-color: rgba(178, 185, 185, 0.1)  !important;
+    padding: 5px 20px;
+  }
+  .rdt_Pagination{
+    background-color: rgba(178, 185, 185, 0.1)  !important;
+  } */

@@ -55,7 +55,7 @@ export default function ChatImgPart({ val }) {
           /></div> ;
     ;
         }
-        else {
+        else if (['jpg', 'jpeg','png','svg'].includes(fileExtension)) {
           // console.log(lightboxData.open);
           icon = <div><img src={imgPath} onClick={() => {
             setLightboxData({ open: innerVal, name: innerVal });
@@ -67,6 +67,11 @@ export default function ChatImgPart({ val }) {
               }}
               slides={[{ src: imgPath }]}
           /></div>
+        }
+        else {
+           // console.log(lightboxData.open);
+           icon = <a href={imgPath} download={original_file_names && original_file_names[i]}> <img src={`${process.env.REACT_APP_IMG_URL}/assets/file_icon/file.png`} alt="file Icon" style={{ height: "100px", width: "100px", marginLeft: "5px" }} /></a>
+           ;
         }
       
         return <div className="position-relative">

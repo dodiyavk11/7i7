@@ -117,6 +117,8 @@ export default function Vieworder() {
   const navigate = useNavigate();
   // get file
   const [file, setFile] = useState([])
+  const shouldRenderDiv = file.some(item => item.isLink === false);
+  const shouldRenderDiv1 = file.some(item => item.isLink === true);
   const GetFile = () => {
 
     axios({
@@ -860,9 +862,9 @@ export default function Vieworder() {
                                 <div> <span style={{ color: '#ffd279' }}> {val.name}</span>  <span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                 <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
                               </p>
-                              <p style={{ whiteSpace: "break-spaces" }}>
+                              <p style={{ whiteSpace: "break-spaces" ,wordBreak: 'break-word'  }}>
 
-                                {(val.message && val.files == null) && (val.message && val.message != null && val.message.toString()) ||
+                                {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
                                   (val.files && val.message == null) && <ChatImgPart val={val} /> ||
 
@@ -891,9 +893,9 @@ export default function Vieworder() {
                                   )}<span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                 {/* <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i> */}
                               </p>
-                              <p style={{ whiteSpace: "break-spaces" }}>
+                              <p style={{ whiteSpace: "break-spaces" ,wordBreak: 'break-word' }}>
 
-                                {(val.message && val.files == null) && (val.message && val.message != null && val.message.toString()) ||
+                                {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
                                   (val.files && val.message == null) && <ChatImgPart val={val} /> ||
 
@@ -1032,7 +1034,7 @@ export default function Vieworder() {
           </div>
 
           {/* cloud files */}
-          <div className="div">
+          {shouldRenderDiv1 ? (    <div className="div">
             <div className="description">
               <div className="row">
                 <div className="col-12">
@@ -1066,10 +1068,11 @@ export default function Vieworder() {
                 </div>
               </div>
             </div>
-          </div>
+          </div>):(<div></div>)}
+      
 
           {/* local files */}
-          <div className="div">
+          {shouldRenderDiv ? ( <div className="div">
             <div className="description">
               <div className="row">
                 <div class="col-12">
@@ -1115,7 +1118,8 @@ export default function Vieworder() {
 
               </div>
             </div>
-          </div>
+          </div>): (<div></div>)}
+         
 
 
 

@@ -72,7 +72,7 @@ export default function () {
   const handleButtonClick = () => {
     // Send an HTTP POST request to your server to save the message in the database
     setIsLoading(true);
-    console.log(message1);
+    // console.log(message1);
     if (message1.trim() === '') {
       setError('chat cannot be empty!!');
     } else {
@@ -558,7 +558,7 @@ export default function () {
   const scrollToBottom = () => {
     if (chatBoxRef.current) {
       // console.log("called")
-      console.log(chatBoxRef.current.scrollTop);
+      // console.log(chatBoxRef.current.scrollTop);
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
       // if(chatBoxRef.current.scrollTop != chatBoxRef.current.scrollHeight) {scrollToBottom()}    
     }
@@ -794,7 +794,7 @@ export default function () {
   const [linkvalue, setlinkValue] = useState([]);
   function EditCloudLink(val) {
     setlinkValue([]);
-    console.log(val);
+    // console.log(val);
     setinputShow(true);
     setlinkValue(val);
 
@@ -802,14 +802,14 @@ export default function () {
   // console.log(linkvalue);
   // console.log(inputshow);
   function canceleditLink(val) {
-    console.log(val);
+    // console.log(val);
     setinputShow(false);
     setlinkValue([]);
 
   }
   function UpdateCloudLink(val) {
     // console.log(val);
-    console.log(editlinkvalue);
+    // console.log(editlinkvalue);
     setinputShow(false);
     setlinkValue([]);
     axios({
@@ -926,8 +926,8 @@ export default function () {
     const textarea = document.getElementById('messageInput');
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    console.log(start);
-    console.log(end);
+    // console.log(start);
+    // console.log(end);
 
     const updatedMessage = message.substring(0, start) + emoji + message.substring(end);
 

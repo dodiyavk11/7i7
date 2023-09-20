@@ -18,7 +18,7 @@ exports.messageSend = async (req, res) => {
     console.log(image);
     const { files, file_detail } = req.body;
     // console.log(image);
-   if(!message && image.length === 0 ) return res.status(404).send({ status: false, message: "Bitte senden Sie eine Nachricht oder Datei", data: [] });
+   if(!message && !image  ) return res.status(404).send({ status: false, message: "Bitte senden Sie eine Nachricht oder Datei", data: [] });
 
     const getUserInfo = await Models.Users.findOne({ where: { id: uId } });
     let chatData = { user_id: uId, order_id, role: getUserInfo.dataValues.role }

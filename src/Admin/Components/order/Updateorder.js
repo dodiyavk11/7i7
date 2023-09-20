@@ -38,6 +38,10 @@ export default function () {
   const [error, setError] = useState('');
   const [editdisabled, setEditDisabled] = useState(false);
   const [editid, seteditID] = useState('');
+  const [buttontext, setbuttontext] = useState('Senden');
+  const [sendBtn, setsendBtn] = useState(false);
+  
+
 
 
   const toggleDropdown = () => {
@@ -150,6 +154,7 @@ export default function () {
       });
   };
   const [chatdata, setchatData] = useState([]);
+  console.log(chatdata);
   const fetchChatData = () => {
     axios({
       method: 'POST',
@@ -601,6 +606,8 @@ export default function () {
   const sendText = () => {
     // progress bar
     scrollToBottom();
+    setbuttontext('Senden warten...');
+    setsendBtn(true);
     const formData = new FormData();
     fileValue.forEach((file, index) => {
       formData.append(`files[${index}]`, file);
@@ -641,6 +648,8 @@ export default function () {
       setChatImg([])
       fileInputRef.current.value = '';
       setchatonchange([]);
+      setsendBtn(false);
+      setbuttontext('Senden');
     }).catch((err) => {
       toast.error(err.response.data.message)
     }).finally(() => {
@@ -652,10 +661,8 @@ export default function () {
 
   const scrollToBottom = () => {
     if (chatBoxRef.current) {
-      // console.log("called")
-      console.log(chatBoxRef.current.scrollTop);
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-      // if(chatBoxRef.current.scrollTop != chatBoxRef.current.scrollHeight) {scrollToBottom()}    
+     chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+     
     }
 
   }
@@ -678,14 +685,14 @@ export default function () {
 
     confirmAlert({
       title: 'Confirm to to change status',
-      message: 'Möchten Sie diesen Datensatz löschen?',
+      message: 'Möchtest Du den Status ändern?',
       buttons: [
         {
-          label: 'JA',
+          label: 'Ja',
           onClick: () => ChangeOrderStatus(e)
         },
         {
-          label: 'No',
+          label: 'Nein',
           //onClick: () => alert('Click No')
         }
       ]
@@ -1402,8 +1409,8 @@ export default function () {
                                   <div> <span style={{ color: '#ffd279' }}>{val.name} </span><span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                   {/* <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i> */}
                                 </p>
-                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-all' }}>
-                                  {(val.message && val.files == null) && (val.message && val.message != null && val.message.toString()) ||
+                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
+                                  {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
                                     (val.files && val.message == null) && <ChatImgPart val={val} /> ||
 
@@ -1435,10 +1442,10 @@ export default function () {
                                   )}<span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                   <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
                                 </p>
-                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-all' }}>
+                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
                                    {/* {val.message.toString()} */}
                                   {
-                                    (val.message && val.files == null) && (val.message && val.message != null && val.message.toString()) ||
+                                    (val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
                                     (val.files && val.message == null) && <ChatImgPart val={val} /> ||
 
@@ -1694,10 +1701,11 @@ export default function () {
                     type="button"
                     className="chat-btn justify-content-center d-flex align-items-center px-2"
                     onClick={sendText}
+                    disabled={sendBtn==true?true:false}
                     style={{ width: '100%' }}
                   >
                     <i class="bi bi-send-fill"></i>
-                    <b className="btn-text">Senden</b>
+                    <b className="btn-text">{buttontext}</b>
                   </button>
                 </div>
               </div>

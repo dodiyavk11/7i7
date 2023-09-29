@@ -52,33 +52,33 @@ exports.messageSend = async (req, res) => {
     const admin = await Models.Users.findAll({where:{role:1}})
     
     
-    // content = `hello from 7i7 you  have chat notification of order ${ordername.dataValues.ordername} `
+    content = `hello from 7i7 you  have chat notification of order ${ordername.dataValues.ordername} `
 
-    // const mailTexts = await Models.email_template.findOne({where:{email_type:'chat_message'}})
-    // let text = mailTexts.email_content 
-    // let subject = mailTexts.header
+    const mailTexts = await Models.email_template.findOne({where:{email_type:'chat_message'}})
+    let text = mailTexts.email_content 
+    let subject = mailTexts.header
     
-    // if (getUserInfo.dataValues.role === 0) {
+    if (getUserInfo.dataValues.role === 0) {
 
       
-    //   const adminUsers = await Models.Users.findAll({ where: { role: 1 } });
-    //   // regular user sent a message, send email notification to all admins
-    //   adminUsers.map( async (val) => {
-    //     text = text.replace("{company_name}", val.company);
-    //     const mail = await emailTemplate(text)
-    //     sendVerifyMail(val.email, subject,"" ,mail);
-    //   });
-    // } else {
-    //   // const users = await Models.Orders.findOne({ where: { id: order_id } })
-    //   // const user = await Models.Users.findOne({ where: { id: users.dataValues.uId } })
-    // //   admin.map(async(val)=>{
-    // //   const adminUsers = await Models.Users.findOne({ where: { email: val.email } });
-    // // })
-    // const admin = await Models.Users.findOne({where:{id:uId}})
-    // text = text.replace("{company_name}", admin.dataValues.company);
-    // const mail = await emailTemplate(text)
-    //   sendVerifyMail(user.dataValues.email, subject, "",mail);
-    // }
+      // const adminUsers = await Models.Users.findAll({ where: { role: 1 } });
+      // // regular user sent a message, send email notification to all admins
+      // adminUsers.map( async (val) => {
+      //   text = text.replace("{company_name}", val.company);
+      //   const mail = await emailTemplate(text)
+      //   sendVerifyMail(val.email, subject,"" ,mail);
+      // });
+    } else {
+    //   const users = await Models.Orders.findOne({ where: { id: order_id } })
+    //   const user = await Models.Users.findOne({ where: { id: users.dataValues.uId } })
+    //   admin.map(async(val)=>{
+    //   const adminUsers = await Models.Users.findOne({ where: { email: val.email } });
+    // })
+    const admin = await Models.Users.findOne({where:{id:uId}})
+    text = text.replace("{company_name}", admin.dataValues.company);
+    const mail = await emailTemplate(text)
+      sendVerifyMail(user.dataValues.email, subject, "",mail);
+    }
  res.status(200).send({ status: true, message: "Nachricht erfolgreich gesendet", data:req.files})
           
   } catch (err) {

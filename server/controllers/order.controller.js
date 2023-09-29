@@ -103,17 +103,17 @@ exports.NewOrder = async (req, res) => {
       checkUser.dataValues.fname + " " + checkUser.dataValues.lname
     }.`;
 
-    let text = mailTexts.email_content;
-    let subject = mailTexts.header;
-    text = text.replace("{order_name}", ordername);
-    text = text.replace(
-      "{user_name}",
-      checkUser.dataValues.fname + " " + checkUser.dataValues.lname
-    );
-    const mail = await emailTemplate(text);
-    admin.map((val) => {
-      sendVerifyMail(val.dataValues.email, subject, "", mail);
-    });
+    // let text = mailTexts.email_content;
+    // let subject = mailTexts.header;
+    // text = text.replace("{order_name}", ordername);
+    // text = text.replace(
+    //   "{user_name}",
+    //   checkUser.dataValues.fname + " " + checkUser.dataValues.lname
+    // );
+    // const mail = await emailTemplate(text);
+    // admin.map((val) => {
+    //   sendVerifyMail(val.dataValues.email, subject, "", mail);
+    // });
 
     res
       .status(200)

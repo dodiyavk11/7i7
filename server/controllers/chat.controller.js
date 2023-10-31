@@ -23,7 +23,8 @@ exports.FetchchatTemplate = async (req, res) => {
     try {
         const { id } = req.params;
         const messages_template = await Models.messages_template.findOne({ where: { id: id } });
-        messages_template.dataValues.static_var = { event_accept: ["{event_name}", "{accepted_date}", "{user_name}"], chat_message: ["{company_name}"],create_new_order: ["{order_name}", "{user_name}"], create_new_event: ["{event_name}", "{event_date}"], order_status: ["{order_name}", "{order_status}"], registration: ["{user_name}", "{user_email}" , "{verification_Link}"] }
+        messages_template.dataValues.static_var = { event_accept: ["{event_name}", "{accepted_date}", "{user_name}"], chat_message: ["{company_name}"], create_new_order: ["{order_name}", "{user_name}"], create_new_event: ["{event_name}", "{event_date}"], order_status: ["{order_name}", "{order_status}"], registration: ["{user_name}", "{user_email}", "{verification_Link}"] }
+        console.log(messages_template);
         res.status(200).send({ status: true, message: "E-Mail-Vorlage erfolgreich zusammenfugen", data: messages_template });
     } catch (err) {
         console.log(err)

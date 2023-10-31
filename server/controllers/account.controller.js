@@ -186,7 +186,13 @@ let updateUser;
   
         userInfo.userImg = userImg.filename
       }
-      userInfo.active_membership_status= active_membership_status
+      // userInfo.active_membership_status= active_membership_status
+      if (active_membership_status == 3) {
+        userInfo.active_membership_status = 3;
+      }
+      else {
+        userInfo.active_membership_status= active_membership_status
+      }
   
       const updateUser = await Models.Users.update(userInfo, { where: { id: uId } })
       delete userInfo.password

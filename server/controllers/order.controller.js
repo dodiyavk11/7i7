@@ -4,6 +4,7 @@ const path = require("path");
 const { unlinkOrder } = require("../utils/unlinkFile");
 const { sendVerifyMail, emailTemplate } = require("../utils/emailsUtils");
 var fs = require("fs");
+const { unlinkChatImage } = require("../utils/unlinkFile")
 
 // add new order - both user and admin side
 exports.NewOrder = async (req, res) => {
@@ -138,6 +139,7 @@ exports.NewOrder = async (req, res) => {
 
 // update order - both side
 exports.UpdateOrder = async (req, res) => {
+  console.log(req.body);
   try {
     const checkId = req.userId;
     const checkUser = await Models.Users.findOne({ where: { id: checkId } });
@@ -157,24 +159,25 @@ exports.UpdateOrder = async (req, res) => {
 
     const getOldOrder = await Models.Orders.findOne({ where: { id: orderId } });
 
-    const orderfile = req.files;
+    // const orderfile = req.body.files;
 
-    if (orderfile) {
-      orderfile.map(async (val, i) => {
-        Models.order_files.create({
-          order_id: orderId,
-          files: val.filename,
-          orignal_name: name[i],
-        });
-        fs.rename(
-          `${__dirname}/../assets/neworder/${name[i]}`,
-          `${__dirname}/../assets/neworder/${val.filename}`,
-          function (err) {
-            console.log(err);
-          }
-        );
-      });
-    }
+    // console.log(orderfile);
+    // if (orderfile) {
+    //   orderfile.map(async (val, i) => {
+    //     Models.order_files.create({
+    //       order_id: orderId,
+    //       files: val.filename,
+    //       orignal_name: name[i],
+    //     });
+    //     fs.rename(
+    //       `${__dirname}/../assets/neworder/${name[i]}`,
+    //       `${__dirname}/../assets/neworder/${val.filename}`,
+    //       function (err) {
+    //         console.log(err);
+    //       }
+    //     );
+    //   });
+    // }
 
     // update assign employees for this order
     if (checkUser.role == 1 || checkUser.role == 2) {
@@ -993,5 +996,29 @@ exports.UpdateOrderStatus = async (req, res) => {
         data: [],
         error: err.message,
       });
+  }
+};
+exports.deletefile = async (req, res) => {
+  console.log(req);
+  const { text } = req.body;
+  const folderPath = "./assets/neworder";
+  
+  const resultString = text.join(', ');
+  const filePath = `${folderPath}/${resultString}`;
+  // console.log(foundFiles);
+  // console.log(filePath);
+  if (fs.existsSync(filePath)) {
+    // Delete the file
+    fs.unlinkSync(filePath);
+
+    // Remove the file name from the uploadedFileNames array (assuming you have one)
+    // const index = uploadedFileNames.findIndex((file) => file.fileName === fileName);
+    // if (index !== -1) {
+    //   uploadedFileNames.splice(index, 1);
+    // }
+
+    res.status(200).json({ message: "File deleted successfully" });
+  } else {
+    res.status(404).json({ message: "File not found" });
   }
 };

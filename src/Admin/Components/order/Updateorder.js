@@ -33,6 +33,7 @@ export default function () {
   const [disabled, setDisabled] = useState(false);
   const [message, setMessage] = useState("");
   const [editmessage1, seteditMessage1] = useState("");
+  const [editheadmessage1, setheadeditMessage1] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [error, setError] = useState('');
@@ -54,6 +55,7 @@ export default function () {
       setMessage1('');
       setEditDisabled(false);
       seteditMessage1('');
+      setheadeditMessage1('');
       seteditID('');
 
     }
@@ -75,11 +77,14 @@ export default function () {
   const handleEditTextareaChange = (e) => {
     seteditMessage1(e.target.value);
   };
+  const handleEditheadChange = (e) => {
+    setheadeditMessage1(e.target.value);
+  };
 
   const handleButtonClick = () => {
     // Send an HTTP POST request to your server to save the message in the database
     setIsLoading(true);
-    console.log(message1);
+    // console.log(message1);
     if (message1.trim() === '') {
       setError('chat cannot be empty!!');
     } else {
@@ -98,6 +103,7 @@ export default function () {
           fetchChatData();
           // history.push('/email_templete');
           setMessage1('');
+          setheadeditMessage1('');
         }).catch((res) => {
           toast.error(res.response.message)
         })
@@ -116,7 +122,7 @@ export default function () {
       headers: {
         'authorization': `Bearer ${token}`
       },
-      data: { text: editmessage1 }
+      data: { text: editmessage1,title:editheadmessage1 }
     })
       .then((res) => {
         // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
@@ -154,7 +160,7 @@ export default function () {
       });
   };
   const [chatdata, setchatData] = useState([]);
-  console.log(chatdata);
+  // console.log(chatdata);
   const fetchChatData = () => {
     axios({
       method: 'POST',
@@ -185,6 +191,7 @@ export default function () {
   };
   const handleDropdownEdit = (item) => {
     seteditMessage1(item.msg_content);
+    setheadeditMessage1(item.msg_title);
     setEditDisabled(true);
     seteditID(item.id);
   };
@@ -474,7 +481,7 @@ export default function () {
 
   // get message
   const [Usermsg, setUsermsg] = useState([]);
-  console.log(Usermsg);
+  // console.log(Usermsg);
   const getmsg = () => {
     axios({
       method: "POST",
@@ -589,7 +596,7 @@ export default function () {
       }
    
     }).then((res) => {
-      console.log(res.data.uploadedFileNames);
+      // console.log(res.data.uploadedFileNames);
       setchatonchange(res.data.uploadedFileNames);
 
     }).catch((err) => {
@@ -643,7 +650,7 @@ export default function () {
         scrollToBottom();
       }, 1000);
       getmsg()
-      console.log(res);
+      // console.log(res);
       setMessage("")
       setChatImg([])
       fileInputRef.current.value = '';
@@ -839,6 +846,8 @@ export default function () {
       file.preview = reader.result;
       setGetFiles([...getFiles]);
     };
+    
+    console.log(file);
     reader.readAsDataURL(file);
   };
 
@@ -888,7 +897,7 @@ export default function () {
         setCloudLink({ length: 1, links: [] })
       })
       .catch((err) => {
-        console.log(err, "reddddddddddddddddddddddddddddddddddd")
+        // console.log(err, "reddddddddddddddddddddddddddddddddddd")
         toast.error(err.response.data.message);
       })
   }
@@ -896,7 +905,7 @@ export default function () {
   const [linkvalue, setlinkValue] = useState([]);
   function EditCloudLink(val) {
     setlinkValue([]);
-    console.log(val);
+    // console.log(val);
     setinputShow(true);
     setlinkValue(val);
 
@@ -904,14 +913,14 @@ export default function () {
   // console.log(linkvalue);
   // console.log(inputshow);
   function canceleditLink(val) {
-    console.log(val);
+    // console.log(val);
     setinputShow(false);
     setlinkValue([]);
 
   }
   function UpdateCloudLink(val) {
     // console.log(val);
-    console.log(editlinkvalue);
+    // console.log(editlinkvalue);
     setinputShow(false);
     setlinkValue([]);
     axios({
@@ -931,7 +940,7 @@ export default function () {
         setCloudLink({ length: 1, links: [] })
       })
       .catch((err) => {
-        console.log(err, "reddddddddddddddddddddddddddddddddddd")
+        // console.log(err, "reddddddddddddddddddddddddddddddddddd")
         toast.error(err.response.data.message);
       })
 
@@ -1028,8 +1037,8 @@ export default function () {
     const textarea = document.getElementById('messageInput');
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    console.log(start);
-    console.log(end);
+    // console.log(start);
+    // console.log(end);
 
     const updatedMessage = message.substring(0, start) + emoji + message.substring(end);
 
@@ -1054,8 +1063,9 @@ export default function () {
           <div className="order-header d-flex div ">
             <i className="bi bi-vector-pen user-i header-i fs-2"></i>
             {/* <h3>{values.ordername}</h3> */}
+            <h3 className=" me-4 ">{values.orderid}</h3>
             <h3 className="me-2 overflow-auto">{values.ordername}</h3>
-            <h3 className="ms-auto me-4 ">{values.orderid}</h3>
+           
           </div>
 
           <form onSubmit={handleSubmit}>
@@ -1407,7 +1417,11 @@ export default function () {
                               <div className="chat-box-one u1 pt-0">
                                 <p className="chat-date d-flex justify-content-between">
                                   <div> <span style={{ color: '#ffd279' }}>{val.name} </span><span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
-                                  {/* <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i> */}
+                                  {
+                                    getRole==1 ? ( <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>) :""
+                                   
+                                  }
+                                  
                                 </p>
                                 <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
                                   {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
@@ -1625,9 +1639,12 @@ export default function () {
                           {isLoaded ? (
                             <div className="chat-drop custom-scrollbar">
                               {chatdata.map((item) => (
+
                                 <span className="dropdown-item chat-drop" key={item.id} >
                                   <div className="input-group justify-content-between ">
                                     {editdisabled && editid == item.id ? (
+                                      <div>
+                                      <input type="text" className="form-control user-input mb-2"  name="editheadmessage" onChange={handleEditheadChange} defaultValue={editheadmessage1} placeholder="Message Heading" />
                                       <textarea
                                         type="text"
                                         placeholder="Type something...."
@@ -1640,14 +1657,16 @@ export default function () {
                                         onChange={handleEditTextareaChange}
 
                                       ></textarea>
+                                      </div>
+
 
                                     ) : (
-                                      <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} >  {item.msg_content.length > 10
-                                        ? item.msg_content.slice(0, 10) + '...'
-                                        : item.msg_content}</span>
+                                        <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} > { item.msg_title != null ? item.msg_title.length > 10
+                                          ? item.msg_title.slice(0, 10) + '...'
+                                          : item.msg_title: "No heading"}</span>
                                     )}
 
-                                    <div className="input-group-append">
+                                    <div className="input-group-append"  style={getRole == 1 ? { display: "block" } : {display: "none" }}>
                                       {editdisabled && editid == item.id ? (
                                         <div className="edit_icons">
                                           <i class="bi bi-check-lg mx-1" onClick={() => handleEditClick(item.id)} style={{ cursor: 'pointer', color: '#C0DE60' }}></i>

@@ -63,6 +63,7 @@ export default function Account() {
       .then(function (res) {
         setIsLoaded(true);
         setData(res.data.data);
+        // console.log(res)
         // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
       })
       .catch(function (res) {
@@ -73,7 +74,7 @@ export default function Account() {
   useEffect(() => {
     getuser();
   }, []);
-
+  // console.log(data);
   // selected subscribe product
 
   // const [selectedproduct, setSelectedProduct] = useState([])
@@ -360,7 +361,8 @@ export default function Account() {
 
   // const [editdata, setEditdata] = useState([]);
 
-  const initialValues = {
+
+  const [values, setValues] = useState({
     email: data.email,
     password: "",
     company: data.company,
@@ -376,53 +378,216 @@ export default function Account() {
     city: data.city,
     code: data.ustId,
     paymentStripe: data.paymentStripe,
+  });
+  // console.log(values);
+  const initialErrors = {
+    email: '',
+    password: '',
+    company: '',
+    street: '',
+    postalNum: '',
+    country: '',
+    fname: '',
+    lname: '',
+    file: '',
+    repeatpassword: '',
+    ustId: '',
+    number: '',
+    city: '',
+    code: '',
+    paymentStripe: '',
+  };
+  const [errors, setErrors] = useState(initialErrors);
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+  const validatePassword = (password, repeatpassword) => {
+    return password === repeatpassword;
   };
 
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    values,
-    errors,
-    touched,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    setFieldValue,
-  } = useFormik({
-    initialValues: initialValues,
-    enableReinitialize: true,
 
-    validationSchema: AccountSchema,
 
-    onSubmit: (data) => {
-      setIsLoading(true); // Start loading
-      // post data on server
-      axios({
-        method: "PATCH",
-        url: `${process.env.REACT_APP_BASE_URL}/account/user/profile`,
-        data: data,
-        headers: {
-          "content-type": "multipart/form-data",
-          authorization: `Bearer ${token}`,
-        },
-      })
-        .then(function (res) {
-          setIsLoaded(true);
-          setUpdate(res.data.data);
-          console.log(res.data.data);
-          toast.success(res.data.message, {
-            toastId: "unique-random-text-xAu9C9-",
-          });
-          // getuser();
-
-        })
-        .catch((res) => {
-          toast.error(res.response.data.message);
-        })
-        .finally(() => {
-          setIsLoading(false); // Stop loading, whether success or error
-        });
-    },
+  const [errors1, setError] = useState({
+    email: '',
+    password: '',
+    repeatpassword: '',
+    company: '',
+    street: '',
+    postalNum: '',
+    country: '',
+    fname: '',
+    file: '',
+    lname: '',
+    ustId: '',
+    number: '',
+    city: '',
+    code: '',
+    paymentStripe: '',
   });
+  const handleChange = (event) => {
+    var newdata = data;
+    const { name, value } = event.target;
+
+    setData({ ...data, [name]: value });
+    // console.log(data);
+    if (name === 'email') {
+      if (!validateEmail(value)) {
+        setError({ ...errors1, email: 'Ungültig E-Mail...' });
+      } else {
+        setError({ ...errors1, email: '' });
+      }
+    }
+    else {
+      setError({ ...errors1, [name]: '' });
+    }
+
+  };
+  const handleBlur = (event) => {
+    const { name, value } = event.target;
+    var newdata = data;
+    // console.log(newdata.password);
+    // console.log(value);
+    if (name == "password" || name == "repeatpassword") {
+      // console.log(value.length);
+      if (value.length < 6) {
+        setError({ ...errors1, [name]: 'Das Passwort darf maximal 6 Zeichen lang sein' });
+      }
+      else if (value.length > 20) {
+        setError({ ...errors1, [name]: 'Das Passwort darf maximal 20 Zeichen lang sein' });
+      }
+      else {
+        setError({ ...errors1, [name]: '' });
+      }
+    }
+
+    setTimeout(() => {
+      // console.log("hiii")
+      if (newdata.password != undefined && newdata.repeatpassword != undefined) {
+        // console.log('asdasd');
+        if (!validatePassword(newdata.password, newdata.repeatpassword)) {
+          setError({ ...errors1, repeatpassword: 'Passwort müss übereinstimmen' });
+        }
+        else {
+          setError({ ...errors1, [name]: '' });
+        }
+      }
+    }, 1000);
+
+  };
+
+
+  // console.log(errors1);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { touched, setFieldValue } = (event) => {
+
+  };
+
+  const handleSubmit = (event) => {
+
+    // const [data, setData] = useState([]);
+    var newdata = data;
+
+
+
+
+    let hasEmptyFields = false;
+      const errorMessages = {};
+      for (const key in newdata) {
+        // console.log('ASdas');
+        if (newdata[key] === '' && key != "active_membership_status" && key != "role"  && key != "password"  && key != "repeatpassword" && key != "ustId" ) {
+          if (key === "company") {
+            errorMessages.company = 'Unternehmen...';
+          } else if (key === "street") {
+            errorMessages.street = 'Straße...';
+          } else if (key === "postalNum") {
+            errorMessages.postalNum = 'Postleitzahl...';
+          } else if (key === "country") {
+            errorMessages.country = 'Land...';
+          } else if (key === "number") {
+            errorMessages.number = 'Nummer...';
+          } else if (key === "city") {
+            errorMessages.city = 'Stadt...';
+          } else if (key === "fname") {
+            errorMessages.fname = 'Vorname...';
+          } else if (key === "lname") {
+            errorMessages.lname = 'Nachname...';
+          } else if (key === "email") {
+            errorMessages.email = 'E-Mail...';
+          }
+          hasEmptyFields = true;
+        }
+        
+       
+      }
+      setError({ ...errors1, ...errorMessages });
+ 
+
+
+
+
+    event.preventDefault();
+    setIsLoading(true);
+
+    setTimeout(() => {
+
+
+      // console.log(validatePassword);
+      if (data.password == undefined) {
+        // console.log("sadd");
+        newdata.password = "";
+      }
+      if (data.repeatpassword == undefined) {
+
+        newdata.repeatpassword = "";
+
+      }
+      // console.log(newdata);
+     
+      if (hasEmptyFields) {
+        setIsLoading(false);
+        // console.log("Some fields are empty.");
+        // You can display an error message or take appropriate action here
+      } else { 
+        axios({
+          method: "PATCH",
+          url: `${process.env.REACT_APP_BASE_URL}/account/user/profile`,
+          data: newdata,
+          headers: {
+            "content-type": "multipart/form-data",
+            authorization: `Bearer ${token}`,
+          },
+        })
+          .then((res) => {
+            setIsLoading(false);
+            // console.log(res);
+            toast.success(res.data.message, {
+              toastId: "unique-random-text-xAu9C9-",
+            });
+            // Handle the response as needed
+          })
+          .catch((res) => {
+            // setIsLoading(false);
+            // console.log(error);
+            toast.error(res.response.data.message);
+            // Handle the error response as needed
+          })
+          .finally(() => {
+            setIsLoading(false); // Stop loading, whether success or error
+          });
+      }
+    
+    }, 1000);
+  };
+
+
+
+
+
+
 
   if (error) {
     return <div>Error: {error.message}</div>;
@@ -475,7 +640,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="fname"
-                        value={values.fname}
+                        defaultValue={data.fname}
                         placeholder="Vorname..."
                         className="user-input"
                         onChange={handleChange}
@@ -483,8 +648,8 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.fname && touched.fname ? (
-                          <small className="form-error">{errors.fname}</small>
+                        {errors1.fname ? (
+                          <small className="form-error">{errors1.fname}</small>
                         ) : null}
                       </div>
                     </div>
@@ -497,7 +662,7 @@ export default function Account() {
                       <input
                         type="email"
                         name="email"
-                        value={values.email}
+                        value={data.email}
                         placeholder="E-Mail..."
                         className="user-input"
                         onChange={handleChange}
@@ -505,8 +670,8 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.email && touched.email ? (
-                          <small className="form-error">{errors.email}</small>
+                        {errors1.email ? (
+                          <small className="form-error">{errors1.email}</small>
                         ) : null}
                       </div>
                     </div>
@@ -519,7 +684,7 @@ export default function Account() {
                       <input
                         type="password"
                         name="password"
-                        value={values.password}
+                        defaultValue={data.password}
                         placeholder="Passwort..."
                         className="user-input"
                         onChange={handleChange}
@@ -527,9 +692,9 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.password && touched.password ? (
+                        {errors1.password ? (
                           <small className="form-error">
-                            {errors.password}
+                            {errors1.password}
                           </small>
                         ) : null}
                       </div>
@@ -544,7 +709,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="company"
-                        value={values.company}
+                        defaultValue={data.company}
                         placeholder="Unternehmen..."
                         className="user-input"
                         onChange={handleChange}
@@ -552,8 +717,8 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.company && touched.company ? (
-                          <small className="form-error">{errors.company}</small>
+                        {errors1.company ? (
+                          <small className="form-error">{errors1.company}</small>
                         ) : null}
                       </div>
                     </div>
@@ -568,7 +733,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="street"
-                        value={values.street}
+                        defaultValue={data.street}
                         placeholder="Straße...."
                         className="user-input"
                         onChange={handleChange}
@@ -576,8 +741,8 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.street && touched.street ? (
-                          <small className="form-error">{errors.street}</small>
+                        {errors1.street ? (
+                          <small className="form-error">{errors1.street}</small>
                         ) : null}
                       </div>
                     </div>
@@ -591,7 +756,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="postalNum"
-                        value={values.postalNum}
+                        defaultValue={data.postalNum}
                         placeholder="Postleitzahl..."
                         className="user-input"
                         onChange={handleChange}
@@ -599,9 +764,9 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.postalNum && touched.postalNum ? (
+                        {errors1.postalNum ? (
                           <small className="form-error">
-                            {errors.postalNum}
+                            {errors1.postalNum}
                           </small>
                         ) : null}
                       </div>
@@ -616,7 +781,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="country"
-                        value={values.country}
+                        defaultValue={data.country}
                         placeholder="Land..."
                         className="user-input"
                         onChange={handleChange}
@@ -624,8 +789,8 @@ export default function Account() {
                       />
                       <div className="error">
                         {" "}
-                        {errors.country && touched.country ? (
-                          <small className="form-error">{errors.country}</small>
+                        {errors1.country  ? (
+                          <small className="form-error">{errors1.country}</small>
                         ) : null}
                       </div>
                     </div>
@@ -639,7 +804,7 @@ export default function Account() {
                       <input
                         type="text"
                         name="lname"
-                        value={values.lname}
+                        defaultValue={data.lname}
                         placeholder="Nachname..."
                         className="user-input"
                         onChange={handleChange}
@@ -647,8 +812,8 @@ export default function Account() {
                       />
                       <div className="error">
 
-                        {errors.lname && touched.lname ? (
-                          <small className="form-error">{errors.lname}</small>
+                        {errors1.lname? (
+                          <small className="form-error">{errors1.lname}</small>
                         ) : null}
                       </div>
                     </div>
@@ -677,9 +842,9 @@ export default function Account() {
                               </div>
                             </div>
                             <div className="error">
-                              {errors.file && touched.file ? (
+                              {errors1.file ? (
                                 <small className="form-error">
-                                  {errors.file}
+                                  {errors1.file}
                                 </small>
                               ) : null}
                             </div>
@@ -687,9 +852,9 @@ export default function Account() {
                         </div>
 
                         <div className="col-1 col-md-2 profile-img">
-                          {values.file ? (
+                          {data.file ? (
                             <img
-                              src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/${values.file}`}
+                              src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/${data.file}`}
                               style={{
                                 height: "50px",
                                 width: "50px",
@@ -720,15 +885,15 @@ export default function Account() {
                         name="repeatpassword"
                         placeholder="Passwort wiederholen..."
                         className="user-input"
-                        value={values.repeatpassword}
+                        defaultValue={data.repeatpassword}
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                       <div className="error">
                         {" "}
-                        {errors.repeatpassword && touched.repeatpassword ? (
+                        {errors1.repeatpassword ? (
                           <small className="form-error">
-                            {errors.repeatpassword}
+                            {errors1.repeatpassword}
                           </small>
                         ) : null}
                       </div>
@@ -744,14 +909,14 @@ export default function Account() {
                         name="ustId"
                         placeholder="USt-IdNr..."
                         className="user-input"
-                        value={values.ustId}
+                        defaultValue={data.ustId}
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                       <div className="error">
                         {" "}
-                        {errors.ustId && touched.ustId ? (
-                          <small className="form-error">{errors.ustId}</small>
+                        {errors1.ustId  ? (
+                          <small className="form-error">{errors1.ustId}</small>
                         ) : null}
                       </div>
                     </div>
@@ -766,14 +931,14 @@ export default function Account() {
                         name="number"
                         placeholder="Nummer..."
                         className="user-input"
-                        value={values.number}
+                        defaultValue={data.number}
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
 
                       <div className="error">
-                        {errors.number && touched.number ? (
-                          <small className="form-error">{errors.number}</small>
+                        {errors1.number  ? (
+                          <small className="form-error">{errors1.number}</small>
                         ) : null}
                       </div>
                     </div>
@@ -788,13 +953,13 @@ export default function Account() {
                         name="city"
                         placeholder="Stadt..."
                         className="user-input"
-                        value={values.city}
+                        defaultValue={data.city}
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                       <div className="error">
-                        {errors.city && touched.city ? (
-                          <small className="form-error">{errors.city}</small>
+                        {errors1.city ? (
+                          <small className="form-error">{errors1.city}</small>
                         ) : null}
                       </div>
                     </div>

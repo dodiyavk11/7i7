@@ -317,7 +317,9 @@ const Updatecustomer = () => {
 
                       <option className="user-option" value="">Status auswählen</option>
                       <option className="user-option" value="true">Aktiv</option>
-                      <option className="user-option" value="false">Gekündigt</option>
+                  <option className="user-option" value="false">Gekündigt</option>
+                  <option className="user-option" value="3" style={{ color: "yellow" }}>Neuer Kunde</option>
+
                     </select>
                   </div>
               {/* <div className="col-md-5 allinputs">

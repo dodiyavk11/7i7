@@ -36,7 +36,17 @@ exports.addEmp = async (req, res) => {
 
     // add permission levels
 
-    if(role == 2 ){
+    if (role == 2) {
+      const mailTexts = await Models.email_template.findOne({ where: { email_type: 'registration' } })
+      let subject = mailTexts.header
+      let text = mailTexts.email_content
+      text = text.replace("{user_name}", fname + lname);
+      text = text.replace("{user_email}", email);
+      const EmailToken = generateJWTToken({ email: addEmp.dataValues.email }, "10m")
+      const VerificationLink = `<a href="${process.env.BASE_URL}/verification/email/${EmailToken}">klicken Sie hier</a>`
+      text = text.replace("{verification_Link}", VerificationLink)
+      const mail = await emailTemplate(text)
+      sendVerifyMail(email, subject, "", mail)
       permission.length > 0 && permission.map(async (val) => {
         try {
           const permissionDetail = {

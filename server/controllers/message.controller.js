@@ -69,8 +69,8 @@ exports.messageSend = async (req, res) => {
       //   sendVerifyMail(val.email, subject,"" ,mail);
       // });
     } else {
-    //   const users = await Models.Orders.findOne({ where: { id: order_id } })
-    //   const user = await Models.Users.findOne({ where: { id: users.dataValues.uId } })
+      // const users = await Models.Orders.findOne({ where: { id: order_id } })
+      // const user = await Models.Users.findOne({ where: { id: users.dataValues.uId } })
     //   admin.map(async(val)=>{
     //   const adminUsers = await Models.Users.findOne({ where: { email: val.email } });
     // })

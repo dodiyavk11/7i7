@@ -14,6 +14,8 @@ import { SlideshowLightbox } from "lightbox.js-react";
 import ChatImgPart from "../../../CommonComponents/chat-components/ChatImgPart";
 import EmojiPicker from 'emoji-picker-react';
 import { BsPlus } from "react-icons/bs";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 // import PhotoAlbum from "react-photo-album";
 
@@ -41,14 +43,42 @@ export default function () {
   const [editid, seteditID] = useState('');
   const [buttontext, setbuttontext] = useState('Senden');
   const [sendBtn, setsendBtn] = useState(false);
-  
+  const [orderfilechange, setorderFilechange] = useState([]);
+  const onchangeinputorder = (files) => {
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechange/${id}`,
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "multipart/form-data",
+      },
+      data: {
+        "files": files,
+
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setImageUploadProgress(progress);
+      }
+
+    }).then((res) => {
+      // console.log(res.data.uploadedFileNames);
+      setorderFilechange(res.data.uploadedFileNames);
+
+    }).catch((err) => {
+
+    }).finally(() => {
 
 
 
+    })
+    // You can also perform additional actions, such as uploading the files to a server.
+    // Example: uploadFilesToServer(files);
+  };
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
- 
+
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsDropdownOpen(false);
@@ -122,7 +152,7 @@ export default function () {
       headers: {
         'authorization': `Bearer ${token}`
       },
-      data: { text: editmessage1,title:editheadmessage1 }
+      data: { text: editmessage1, title: editheadmessage1 }
     })
       .then((res) => {
         // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
@@ -530,10 +560,10 @@ export default function () {
         // Add your custom logic here for the found file
       }
     });
-  
+
 
     axios({
-      method: 'post', 
+      method: 'post',
       url: `${process.env.REACT_APP_BASE_URL}/message/filechangedelete/${id}`,
       headers: {
         'authorization': `Bearer ${token}`
@@ -546,10 +576,10 @@ export default function () {
         // fetchChatData();
         // setEditDisabled(false);
         // console.log(chatonchange);
-          // Remove the found files from chatonchange
+        // Remove the found files from chatonchange
         setchatonchange(chatonchange.filter((file) => file.originalname !== fileName));
 
-    
+
         // chatonchange1 = [];
       }).catch((res) => {
         // toast.error(res.response.message)
@@ -563,7 +593,7 @@ export default function () {
   const handleImage = (event, file) => {
     const reader = new FileReader();
     // console.log(chatImg);
-   
+
     reader.onloadend = () => {
       file.preview = reader.result;
       setGetFiles([...getFiles]);
@@ -585,7 +615,7 @@ export default function () {
         "content-type": "multipart/form-data",
       },
       data: {
-        
+
         // file_detail: imgNames,
         "files": files,
 
@@ -594,17 +624,17 @@ export default function () {
         const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setImageUploadProgress(progress);
       }
-   
+
     }).then((res) => {
       // console.log(res.data.uploadedFileNames);
       setchatonchange(res.data.uploadedFileNames);
 
     }).catch((err) => {
-      
+
     }).finally(() => {
 
 
-     
+
     })
     // You can also perform additional actions, such as uploading the files to a server.
     // Example: uploadFilesToServer(files);
@@ -668,8 +698,8 @@ export default function () {
 
   const scrollToBottom = () => {
     if (chatBoxRef.current) {
-     chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
-     
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+
     }
 
   }
@@ -768,24 +798,36 @@ export default function () {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value);
       });
+      const filenames = [];
+      // console.log(orderfilechange);
+      // Iterate through the orderfilechange array using forEach
+
+      orderfilechange.forEach((file) => {
+        // Assuming each item in orderfilechange is an object with a 'filename' property
+        if (file.filename) {
+          filenames.push(file.fileName);
+        }
+      });
+
+
+
+      // Now the 'filenames' array contains all the filenames from orderfilechange
+      console.log(filenames);
 
       axios({
         method: "PATCH",
         url: `${process.env.REACT_APP_BASE_URL}/order/update/${id}`,
-        data: { ...value, products: pdts, employee: empid, "files[]": fileValue, name: filename },
+        data: { ...value, products: pdts, employee: empid, "files": orderfilechange, filenames: orderfilechange },
         headers: {
           "content-type": "multipart/form-data",
           authorization: `Bearer ${token}`,
         },
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setImageUploadProgress(progress);
-        },
+
 
 
       })
         .then((res) => {
-          setEditdata(res.data);
+          // setEditdata(res.data);
           setTimeout(() => {
             toast.success(res.data.message);
           }, 1000);
@@ -827,6 +869,7 @@ export default function () {
   const handleRemoveFiles = (file) => {
     const updatedFiles = filesValues && filesValues.filter((f) => f !== file);
     setFilesValues(updatedFiles);
+
   };
 
 
@@ -838,6 +881,44 @@ export default function () {
   const handleRemoveFile = (file) => {
     const updatedFiles = fileValue.filter((f) => f !== file);
     setFileValue(updatedFiles);
+    const fileName = file.name;
+    const foundFiles = [];
+    // const foundFile = '';
+    // console.log(fileName);
+    orderfilechange.forEach((file) => {
+      if (file.originalname === fileName) {
+        // Perform an action for the file with a matching originalname
+        // console.log("Found File:", file.fileName);
+        foundFiles.push(file.fileName);
+        // Add your custom logic here for the found file
+      }
+    });
+    axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechangedelete/${id}`,
+      headers: {
+        'authorization': `Bearer ${token}`
+      },
+      data: { text: foundFiles }
+    })
+      .then((res) => {
+        // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
+        // console.log(res);
+        // console.log("deletFile");
+        // fetchChatData();
+        // setEditDisabled(false);
+        // console.log(chatonchange);
+        // Remove the found files from chatonchange
+        setorderFilechange(orderfilechange.filter((file) => file.originalname !== fileName));
+
+
+        // chatonchange1 = [];
+      }).catch((res) => {
+        // toast.error(res.response.message)
+      })
+      .finally(() => {
+        // setIsLoading(false); // Stop loading, whether success or error
+      });
   };
 
   const handleImageChange = (event, file) => {
@@ -846,8 +927,8 @@ export default function () {
       file.preview = reader.result;
       setGetFiles([...getFiles]);
     };
-    
-    console.log(file);
+
+    // console.log(file);
     reader.readAsDataURL(file);
   };
 
@@ -1049,13 +1130,20 @@ export default function () {
     // textarea.focus();
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
 
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   const [isLoaded, setIsLoaded] = useState(false);
   if (!isLoaded) {
     return <img src={"https://i.gifer.com/VAyR.gif"} className="loader" />
   } else {
-
+ 
 
     return (
       <>
@@ -1065,8 +1153,98 @@ export default function () {
             {/* <h3>{values.ordername}</h3> */}
             <h3 className=" me-4 ">{values.orderid}</h3>
             <h3 className="me-2 overflow-auto">{values.ordername}</h3>
-           
+            <button
+              type="button"
+
+              className="login-btn ms-auto me-3 revision-btn w-auto"
+              onClick={openModal}
+            >
+
+              <i className="bi bi-vector-pen ps-2 pe-2 icon"></i>
+              Revision
+
+              
+            </button>
+            
+   
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              className="login-btn  send-btn w-auto"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span><i className="bi bi-hourglass-split icon pe-1"></i>Wird bearbeitet...</span> // Replace with your loader icon
+              ) : (
+                <span>
+                  <i className="bi bi-save2-fill ps-2 pe-2 icon"></i>
+                  Speichern
+                </span>
+              )}
+            </button>
           </div>
+          <Modal show={isModalOpen} onHide={closeModal} dialogClassName="modal-90w" className="revisionModal "  
+      aria-labelledby="contained-modal-title-vcenter"
+      centered>
+        <Modal.Header >
+          <Modal.Title id="contained-modal-title-vcenter"><i class="bi bi-person-square me-4"></i><h3>Revision einreichen</h3></Modal.Title>
+        </Modal.Header>
+            <Modal.Body>
+              <label className="user-label">
+              <i class="bi bi-person-vcard"></i> Details zur Revision:<small  >*</small>
+                </label>
+                <textarea
+                    className="user-input user-textarea"
+                    placeholder="Geben Sie hier Details zu den Revisionen ein."
+                    name="orderdetail"
+                    id="orderdetail"
+                    // value={values.orderdetail}
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                  ></textarea>
+                <div className="order-field">
+                  <i className="bi bi-file-earmark-arrow-up user-i"></i>
+                  <label className="user-label">
+                    Dateien: <small>*</small>
+                  </label>
+                  <div className="file-area file-area-border">
+                    <input
+                      type="file"
+                      id="files"
+                      name="files[]"
+                      multiple="multiple"
+                      className="user-input"
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files);
+                        onchangeinputorder(files);
+                        files.forEach((file) => {
+                          handleImageChange(event, file);
+                        });
+                        setFileValue(files);
+                        const fileNames = Array.from(event.target.files).map(file => { return file.name });
+                        SetFilename(fileNames); // Set the original file names separated by commas
+                      }}
+                    />
+                    <div className="user-input profile-input">
+                      <div className="success">
+                        <i className="bi bi-image"></i>    Dateien hochladen
+                      </div>
+                    </div>
+                  </div>
+                  <div className="error"></div>
+                </div>
+            </Modal.Body>
+        <Modal.Footer className="justify-center">
+        <button
+              type="button"
+              className="login-btn mx-auto revision-btn w-auto"
+              onClick={closeModal}
+            >
+              <i className="bi bi-vector-pen ps-2 pe-2 icon"></i>
+              Revision einreichen
+            </button>
+        </Modal.Footer>
+      </Modal>
 
           <form onSubmit={handleSubmit}>
             <div className="navigation-links d-flex  row">
@@ -1273,6 +1451,7 @@ export default function () {
                       className="user-input"
                       onChange={(event) => {
                         const files = Array.from(event.target.files);
+                        onchangeinputorder(files);
                         files.forEach((file) => {
                           handleImageChange(event, file);
                         });
@@ -1376,21 +1555,7 @@ export default function () {
                     ) : null}
                   </div>
                 </div>
-                <button
-                  type="submit"
-                  onClick={handleSubmit}
-                  className="login-btn send-btn w-100"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <span><i className="bi bi-hourglass-split icon pe-1"></i>Wird bearbeitet...</span> // Replace with your loader icon
-                  ) : (
-                    <span>
-                      <i class="bi bi-save2-fill ps-2 pe-2 icon"></i>
-                      Speichern
-                    </span>
-                  )}
-                </button>
+
               </div>
             </div>
           </form>
@@ -1418,10 +1583,10 @@ export default function () {
                                 <p className="chat-date d-flex justify-content-between">
                                   <div> <span style={{ color: '#ffd279' }}>{val.name} </span><span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                   {
-                                    getRole==1 ? ( <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>) :""
-                                   
+                                    getRole == 1 ? (<i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>) : ""
+
                                   }
-                                  
+
                                 </p>
                                 <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
                                   {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
@@ -1457,7 +1622,7 @@ export default function () {
                                   <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
                                 </p>
                                 <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
-                                   {/* {val.message.toString()} */}
+                                  {/* {val.message.toString()} */}
                                   {
                                     (val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
@@ -1465,8 +1630,8 @@ export default function () {
 
                                     (val.message && val.files) && ((val.message && val.message != null &&
 
-                                        <span>
-                                          <ChatImgPart val={val} />
+                                      <span>
+                                        <ChatImgPart val={val} />
                                         {val.message.toString()}
                                       </span>
                                     ))
@@ -1497,25 +1662,25 @@ export default function () {
                   <div className="file-item" key={index}>
                     {file.type.startsWith('image/') ? (<img src={file.preview} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.name} />) : file.type.startsWith('video/') ? (
                       <>
-                      <div className="d-flex flex-column" >
-                        <i class="bi bi-file-earmark-play-fill"  title={file.name} ></i>
+                        <div className="d-flex flex-column" >
+                          <i class="bi bi-file-earmark-play-fill" title={file.name} ></i>
 
-                      </div>
-                    </>
-                    ) : file.type.endsWith('/zip') ? ( <>
+                        </div>
+                      </>
+                    ) : file.type.endsWith('/zip') ? (<>
                       <div className="d-flex flex-column" >
                         <i class="bi bi-file-earmark-zip-fill" title={file.name} ></i>
 
                       </div>
-                    </>): (
+                    </>) : (
                       <>
-                      <div className="d-flex flex-column" >
-                        <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
+                        <div className="d-flex flex-column" >
+                          <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
 
-                      </div>
-                    </>
+                        </div>
+                      </>
                     )
-                      
+
                     }
                     <div className="cancle_icon" onClick={() => handleRemoveImg(file)}>
                       <i class="bi bi-x-circle-fill red_icon"></i>
@@ -1523,7 +1688,7 @@ export default function () {
                   </div>
                 ))}
                 {/* progress bar part */}
-             
+
 
               </div>
               {
@@ -1532,7 +1697,7 @@ export default function () {
                   <span className="ps-2">{`${imageUploadProgress}%`}</span>
                 </div>
               }
-              
+
               {/* chat input fields part */}
               <div className="row pt-2 pb-2 position-relative">
 
@@ -1644,29 +1809,29 @@ export default function () {
                                   <div className="input-group justify-content-between ">
                                     {editdisabled && editid == item.id ? (
                                       <div>
-                                      <input type="text" className="form-control user-input mb-2"  name="editheadmessage" onChange={handleEditheadChange} defaultValue={editheadmessage1} placeholder="Message Heading" />
-                                      <textarea
-                                        type="text"
-                                        placeholder="Type something...."
-                                        className="form-control user-input edit_textarea"
-                                        name="editmessage"
-                                        required
-                                        id="messageInput"
-                                        defaultValue={editmessage1}
+                                        <input type="text" className="form-control user-input mb-2" name="editheadmessage" onChange={handleEditheadChange} defaultValue={editheadmessage1} placeholder="Message Heading" />
+                                        <textarea
+                                          type="text"
+                                          placeholder="Type something...."
+                                          className="form-control user-input edit_textarea"
+                                          name="editmessage"
+                                          required
+                                          id="messageInput"
+                                          defaultValue={editmessage1}
 
-                                        onChange={handleEditTextareaChange}
+                                          onChange={handleEditTextareaChange}
 
-                                      ></textarea>
+                                        ></textarea>
                                       </div>
 
 
                                     ) : (
-                                        <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} > { item.msg_title != null ? item.msg_title.length > 10
-                                          ? item.msg_title.slice(0, 10) + '...'
-                                          : item.msg_title: "No heading"}</span>
+                                      <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} > {item.msg_title != null ? item.msg_title.length > 10
+                                        ? item.msg_title.slice(0, 10) + '...'
+                                        : item.msg_title : "No heading"}</span>
                                     )}
 
-                                    <div className="input-group-append"  style={getRole == 1 ? { display: "block" } : {display: "none" }}>
+                                    <div className="input-group-append" style={getRole == 1 ? { display: "block" } : { display: "none" }}>
                                       {editdisabled && editid == item.id ? (
                                         <div className="edit_icons">
                                           <i class="bi bi-check-lg mx-1" onClick={() => handleEditClick(item.id)} style={{ cursor: 'pointer', color: '#C0DE60' }}></i>
@@ -1720,7 +1885,7 @@ export default function () {
                     type="button"
                     className="chat-btn justify-content-center d-flex align-items-center px-2"
                     onClick={sendText}
-                    disabled={sendBtn==true?true:false}
+                    disabled={sendBtn == true ? true : false}
                     style={{ width: '100%' }}
                   >
                     <i class="bi bi-send-fill"></i>

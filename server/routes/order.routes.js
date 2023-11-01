@@ -30,8 +30,8 @@ module.exports = (app) => {
   app.post("/order/get/filter", [checkAuth, isAdmin], GetFilteredOrder)
   app.post("/order/get", [checkAuth], GetOrderByUId)
   app.post("/order/get/:id", [checkAuth], GetOrderByOrderId)
-  app.post("/order/update/:orderId", [checkAuth], UpdateOrder);
-  
+  app.patch("/order/update/:orderId", [checkAuth, upload.array("files[]",999999)], UpdateOrder);
+
   app.post("/order/filechange/:id", Imgupload1.array("files[]", 999999), (req, res) => {
     // console.log(req);
     res.json({ uploadedFileNames });

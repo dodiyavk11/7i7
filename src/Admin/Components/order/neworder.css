@@ -203,7 +203,47 @@ option {
   font-size: 18px;
 
 }
+.revisionModal .modal-content {
+  background-color: #b2b9b91a;
+  padding: 0px 20px ;
+  /* border: 1px solid rgb(255 255 255); */
+}
+.revisionModal .modal-header {
+  border: none;
+  margin: 18px;
+  border-radius: 10px;
+  width: 95%;
+  justify-content: center;
+  /* padding: 21px; */
+  background: #222328;
+}
+.revisionModal .modal-header .modal-title{
+  display: flex;
 
+}
+.modal-backdrop.show {
+  opacity: 0.9!important;
+}
+
+@media (min-width: 576px){
+  .modal-dialog {
+    max-width: 637px;
+    margin: 1.75rem auto;
+  }
+}
+
+.revisionModal .modal-footer {
+  border: none;
+}
+.revision-btn {
+  background-color: #da615c;
+  height: 40px;
+  border-radius: 5px;
+  padding-left: 1%;
+  padding-right: 1%;
+  font-size: 18px;
+
+}
 .delete-btn {
   background-color: rgb(134, 86, 75);
   margin-left: 1%;

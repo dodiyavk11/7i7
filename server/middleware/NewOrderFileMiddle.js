@@ -3,9 +3,9 @@ const multer = require("multer");
 
 // new order file storage config
 const newOrderConfig = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "./assets/neworder")
-  },
+  // destination: (req, file, cb) => {
+  //   cb(null, "./assets/neworder")
+  // },
   filename: (req, file, cb) => {
     // console.log(file)
     cb(null, `NewOrder_${Date.now() + path.extname(file.originalname)}`)

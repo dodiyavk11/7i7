@@ -139,7 +139,7 @@ exports.NewOrder = async (req, res) => {
 
 // update order - both side
 exports.UpdateOrder = async (req, res) => {
-  console.log(req.body);
+  console.log(req.body.files);
   try {
     const checkId = req.userId;
     const checkUser = await Models.Users.findOne({ where: { id: checkId } });
@@ -159,25 +159,26 @@ exports.UpdateOrder = async (req, res) => {
 
     const getOldOrder = await Models.Orders.findOne({ where: { id: orderId } });
 
-    // const orderfile = req.body.files;
+
+    const orderfile = req.body.files;
 
     // console.log(orderfile);
-    // if (orderfile) {
-    //   orderfile.map(async (val, i) => {
-    //     Models.order_files.create({
-    //       order_id: orderId,
-    //       files: val.filename,
-    //       orignal_name: name[i],
-    //     });
-    //     fs.rename(
-    //       `${__dirname}/../assets/neworder/${name[i]}`,
-    //       `${__dirname}/../assets/neworder/${val.filename}`,
-    //       function (err) {
-    //         console.log(err);
-    //       }
-    //     );
-    //   });
-    // }
+    if (orderfile) {
+      orderfile.map(async (val, i) => {
+        Models.order_files.create({
+          order_id: orderId,
+          files: val.fileName,
+          orignal_name: val.originalname,
+        });
+        fs.rename(
+          `${__dirname}/../assets/neworder/${val.originalname}`,
+          `${__dirname}/../assets/neworder/${val.fileName}`,
+          function (err) {
+            console.log(err);
+          }
+        );
+      });
+    }
 
     // update assign employees for this order
     if (checkUser.role == 1 || checkUser.role == 2) {
@@ -236,7 +237,7 @@ exports.UpdateOrder = async (req, res) => {
         data: orderInfo,
       });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     res
       .status(500)
       .send({
@@ -999,7 +1000,8 @@ exports.UpdateOrderStatus = async (req, res) => {
   }
 };
 exports.deletefile = async (req, res) => {
-  console.log(req);
+  // console.log(req);
+  
   const { text } = req.body;
   const folderPath = "./assets/neworder";
   

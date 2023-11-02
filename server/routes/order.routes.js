@@ -1,5 +1,5 @@
 const { checkAuth, isAdmin } = require("../middleware/checkAuthMiddle")
-const { NewOrder, GetAllOrder, GetOrderByUId, UpdateOrder, GetFilteredOrder, GetOrderByOrderId, DeleteOrderFile, DeleteOrder, FileAdd, GetFile, DeleteFinalFile,deletefile, UpdateOrderStatus, NoSubscribeProduct, DeleteCloudLinkFinalFile, AddCloudLinkFinalFile,UpdateCloudLinkFinalFile } = require("../controllers/order.controller")
+const { NewOrder, GetAllOrder, GetOrderByUId, UpdateOrder, GetFilteredOrder, GetOrderByOrderId, DeleteOrderFile, DeleteOrder, FileAdd, GetFile, DeleteFinalFile,deletefile, UpdateOrderStatus, NoSubscribeProduct, DeleteCloudLinkFinalFile,revisisondeletefile, AddCloudLinkFinalFile,UpdateCloudLinkFinalFile } = require("../controllers/order.controller")
 const { upload, uploadFinal } = require("../middleware/NewOrderFileMiddle")
 
 
@@ -21,7 +21,20 @@ const Imgupload1 = multer({
   storage: ChatConfig,
 });
 
-
+let reuploadedFileNames = [];
+const RevisionConfig = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./assets/revision_file")
+  },
+  filename: (req, file, cb) => {
+    const fileName = `revision_${Date.now()}${path.extname(file.originalname)}`;
+    reuploadedFileNames.push({ originalname: file.originalname, fileName }); // Store the file name in the array
+    cb(null, fileName);
+  }
+})
+const Imgupload2 = multer({
+  storage: RevisionConfig,
+});
 
 
 module.exports = (app) => {
@@ -49,5 +62,10 @@ module.exports = (app) => {
   app.post("/orderfile/cloudLinks_edit/:id",[checkAuth],UpdateCloudLinkFinalFile)
   
   app.post("/orderfile/cloudLinks_delete/:id",[checkAuth],DeleteCloudLinkFinalFile)
-  app.post("/order/updateorder/orderstatus/:orderId",[checkAuth],UpdateOrderStatus)
+  app.post("/order/updateorder/orderstatus/:orderId", [checkAuth], UpdateOrderStatus)
+  app.post("/order/revisionfilechange/:id", Imgupload2.array("files[]", 999999), (req, res) => {
+    res.json({ reuploadedFileNames });
+    reuploadedFileNames = [];
+  });
+  app.post("/order/revisionfiledelete/:id", [checkAuth], revisisondeletefile);
 }

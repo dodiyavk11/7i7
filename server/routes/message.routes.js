@@ -1,4 +1,4 @@
-const { messageSend, fetchMessageByOrderId, deleteChatMessage,deletefile} = require("../controllers/message.controller");
+const { messageSend, fetchMessageByOrderId, deleteChatMessage,deletefile,RevisionmessageSend} = require("../controllers/message.controller");
 const { Imgupload } = require("../middleware/ChatMiddle");
 // const { uploadedFileNames } = require("../middleware/ChatMiddle");
 const { checkAuth } = require("../middleware/checkAuthMiddle");
@@ -29,5 +29,8 @@ module.exports = (app) => {
     uploadedFileNames = [];
   });
   app.post("/message/filechangedelete/:id", [checkAuth], deletefile);
+
+
+  app.post("/revisionmsg/send/:order_id", [checkAuth], RevisionmessageSend);
 
 }

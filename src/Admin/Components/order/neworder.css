@@ -213,12 +213,18 @@ option {
   margin: 18px;
   border-radius: 10px;
   width: 95%;
-  justify-content: center;
+ 
   /* padding: 21px; */
   background: #222328;
 }
 .revisionModal .modal-header .modal-title{
   display: flex;
+  margin-bottom: -12px;
+  line-height: 15px;
+
+}
+.revisionModal .bi-person-square::before {
+  line-height: 31px;
 
 }
 .modal-backdrop.show {

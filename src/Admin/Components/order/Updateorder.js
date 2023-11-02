@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import "./neworder.css";
 import { useFormik } from "formik";
-import jQuery from "jquery";
+import jQuery, { event } from "jquery";
 import $ from "jquery";
 import NeworderRegistrationSchema from "./OrderRegistrationSchima";
 import { toast, ToastContainer } from "react-toastify";
@@ -1095,22 +1095,7 @@ export default function () {
 
   // emoji part
   const [showEmoji, setShowEmoji] = useState(false);
-  // const emojiWrapperRef = useRef(null);
-  // useEffect(() => {
-  //   // Add a click event listener to the document
-  //   document.addEventListener('click', handleClickOutside1, { passive: true });
 
-  //   // Remove the event listener when the component unmounts
-  //   return () => {
-  //     document.removeEventListener('click', handleClickOutside1, { passive: true });
-  //   };
-  // }, []);
-  // const handleClickOutside1 = (event) => {
-  //   // Check if the click event occurred outside the emoji wrapper
-  //   if (emojiWrapperRef.current && !emojiWrapperRef.current.contains(event.target)) {
-  //     setShowEmoji(false);
-  //   }
-  // };
 
 
 
@@ -1131,19 +1116,139 @@ export default function () {
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [revisionfile, setRevisionFile] = useState([]);
+  const [revisionfilechange, setRevisionFilechange] = useState([]);
+  
+  const [revisionfile, setRevisionFile] = useState([])
+  const revisionpreview = (event, file) => {
+    setRevisionFile([]);
+   const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewPath = e.target.result;
+  
+        // Add the preview path to the revisionfile state array
+        setRevisionFile((prevFiles) => [...prevFiles, { file, previewPath }]);
+      };
+      reader.readAsDataURL(file);
+    
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
   };
+  const onchangerevisionfile = (files) => {
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/order/revisionfilechange/${id}`,
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "multipart/form-data",
+      },
+      data: {
+        "files": files,
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setImageUploadProgress(progress);
+      },
+
+    }).then((res) => {
+     
+      setRevisionFilechange(res.data.reuploadedFileNames);
+    }).catch((err) => {
+    }).finally(() => {
+    })
+    // You can also perform additional actions, such as uploading the files to a server.
+    // Example: uploadFilesToServer(files);
+  };
+  const RevisionRemoveFile = (file) => {
+    console.log(file)
+    const updatedFiles = revisionfile.filter((f) => f !== file);
+    setRevisionFile(updatedFiles);
+    const fileName = file.name;
+    const foundFiles = [];
+    // const foundFile = '';
+    console.log(fileName);
+    revisionfilechange.forEach((file) => {
+      if (file.originalname === fileName) {
+        // Perform an action for the file with a matching originalname
+        // console.log("Found File:", file.fileName);
+        foundFiles.push(file.fileName);
+        // Add your custom logic here for the found file
+      }
+    });
+    axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_BASE_URL}/order/revisionfiledelete/${id}`,
+      headers: {
+        'authorization': `Bearer ${token}`
+      },
+      data: { text: foundFiles }
+    })
+      .then((res) => {
+       
+        setRevisionFilechange(revisionfilechange.filter((file) => file.originalname !== fileName));
+        const updatedRevisionFile = revisionfile
+        .filter((file) => file.file.name !== fileName)
+        .map(({ file, previewPath }) => ({ file, previewPath }));
+
+
+          setRevisionFile(updatedRevisionFile);
+   
+      }).catch((res) => {
+        // toast.error(res.response.message)
+      })
+      .finally(() => {
+        // setIsLoading(false); // Stop loading, whether success or error
+      });
+  };
 
   const closeModal = () => {
     setIsModalOpen(false);
+    setRevisionmsg("");
+    setRevisionFile([]);
+    setRevisionFilechange([]);
   };
+  const [revisionmsg, setRevisionmsg] = useState('');
+  const RevisionSubmit = () => {
+    console.log(revisionmsg);
+    console.log(revisionfilechange);
+    scrollToBottom();
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/revisionmsg/send/${id}`,
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      data: {
+        message: revisionmsg,
+        files: revisionfilechange,
+      },
+    }).then((res) => {
+      toast.success(res.data.message)
+      setTimeout(() => {
+        scrollToBottom();
+      }, 1000);
+      getmsg()
+     
+      setIsModalOpen(false);
+
+     
+    }).catch((err) => {
+      toast.error(err.response.data.message)
+    }).finally(() => {
+
+
+      setImageUploadProgress(0); // Reset the progress bar
+    })
+  };
+
+  
   const [isLoaded, setIsLoaded] = useState(false);
   if (!isLoaded) {
     return <img src={"https://i.gifer.com/VAyR.gif"} className="loader" />
   } else {
- 
+
 
     return (
       <>
@@ -1163,10 +1268,10 @@ export default function () {
               <i className="bi bi-vector-pen ps-2 pe-2 icon"></i>
               Revision
 
-              
+
             </button>
-            
-   
+
+
             <button
               type="submit"
               onClick={handleSubmit}
@@ -1183,681 +1288,710 @@ export default function () {
               )}
             </button>
           </div>
-          <Modal show={isModalOpen} onHide={closeModal} dialogClassName="modal-90w" className="revisionModal "  
-      aria-labelledby="contained-modal-title-vcenter"
-      centered>
-        <Modal.Header >
-          <Modal.Title id="contained-modal-title-vcenter"><i class="bi bi-person-square me-4"></i><h3>Revision einreichen</h3></Modal.Title>
-        </Modal.Header>
+          <Modal show={isModalOpen} onHide={closeModal} dialogClassName="modal-90w" className="revisionModal "
+            aria-labelledby="contained-modal-title-vcenter"
+            centered>
+            <Modal.Header >
+              <Modal.Title id="contained-modal-title-vcenter"><i class="bi bi-person-square ms-3 me-4"></i><h3>Revision einreichen</h3></Modal.Title>
+            </Modal.Header>
             <Modal.Body>
               <label className="user-label">
-              <i class="bi bi-person-vcard"></i> Details zur Revision:<small  >*</small>
+                <i class="bi bi-person-vcard "></i> Details zur Revision:<small  >*</small>
+              </label>
+              <textarea
+                className="user-input user-textarea"
+                placeholder="Geben Sie hier Details zu den Revisionen ein."
+                name="orderdetail"
+                id="orderdetail"
+           
+                
+                onChange={(e) => { setRevisionmsg(e.target.value) }}
+              ></textarea>
+              <div className="order-field">
+                <i className="bi bi-file-earmark-arrow-up user-i"></i>
+                <label className="user-label">
+                  Dateien: <small>*</small>
                 </label>
-                <textarea
-                    className="user-input user-textarea"
-                    placeholder="Geben Sie hier Details zu den Revisionen ein."
-                    name="orderdetail"
-                    id="orderdetail"
-                    // value={values.orderdetail}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                  ></textarea>
-                <div className="order-field">
-                  <i className="bi bi-file-earmark-arrow-up user-i"></i>
-                  <label className="user-label">
-                    Dateien: <small>*</small>
-                  </label>
-                  <div className="file-area file-area-border">
-                    <input
-                      type="file"
-                      id="files"
-                      name="files[]"
-                      multiple="multiple"
-                      className="user-input"
-                      onChange={(event) => {
-                        const files = Array.from(event.target.files);
-                        onchangeinputorder(files);
-                        files.forEach((file) => {
-                          handleImageChange(event, file);
-                        });
-                        setFileValue(files);
-                        const fileNames = Array.from(event.target.files).map(file => { return file.name });
-                        SetFilename(fileNames); // Set the original file names separated by commas
-                      }}
-                    />
-                    <div className="user-input profile-input">
-                      <div className="success">
-                        <i className="bi bi-image"></i>    Dateien hochladen
-                      </div>
+                {revisionfile.map((file, index) => (
+                  <div className="file-item" key={index}>
+                    
+                     {file.file.type && file.file.type.startsWith('image/') ?
+
+                      <img src={file.previewPath} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.file.name} />
+                      :
+                      <>
+                        <div className="d-flex flex-column" >
+                          <i class="bi bi-file-earmark-pdf-fill" title={file.file.name} ></i>
+
+                        </div>
+                      </>
+                    }
+                    <div className="cancle_icon" onClick={() => RevisionRemoveFile(file.file)}>
+                      <i class="bi bi-x-circle-fill red_icon"></i>
                     </div>
                   </div>
-                  <div className="error"></div>
+                ))}
+              {
+                revisionfile.length > 0 ? <div className="ps-2 "> <progress className="custom_progress" style={{ backgroundColor: '#C0DE60' }} value={imageUploadProgress} max="100" />
+                  <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
+              }
+              <div className="file-area file-area-border">
+                <input
+                  type="file"
+                  id="files"
+                  name="files1"
+                  multiple="multiple"
+                  className="user-input"
+                  onChange={(event) => {
+                    const files = Array.from(event.target.files);
+                   
+                    // setRevisionFile(files);
+                    files.forEach((file) => {
+                      revisionpreview(event, file);
+                
+                      
+                    });
+                    onchangerevisionfile(files);
+                   
+                  }}
+                  
+                  />
+                 
+
+                <div className="user-input profile-input">
+                  <div className="success">
+                    <i className="bi bi-image"></i>    Dateien hochladen
+                  </div>
                 </div>
-            </Modal.Body>
-        <Modal.Footer className="justify-center">
-        <button
+              </div>
+              <div className="error"></div>
+              </div>
+             
+          </Modal.Body>
+          <Modal.Footer className="justify-center">
+            <button
               type="button"
               className="login-btn mx-auto revision-btn w-auto"
-              onClick={closeModal}
+              onClick={RevisionSubmit}
             >
               <i className="bi bi-vector-pen ps-2 pe-2 icon"></i>
               Revision einreichen
             </button>
-        </Modal.Footer>
-      </Modal>
+          </Modal.Footer>
+        </Modal>
 
-          <form onSubmit={handleSubmit}>
-            <div className="navigation-links d-flex  row">
-              <div className="overview-page  col-12 col-md-3 col-xxl-2">
-                <i className="bi bi-chevron-left pe-2"></i>
+        <form onSubmit={handleSubmit}>
+          <div className="navigation-links d-flex  row">
+            <div className="overview-page  col-12 col-md-3 col-xxl-2">
+              <i className="bi bi-chevron-left pe-2"></i>
 
-                {/* <button
+              {/* <button
                   className="nav-link-first"
                   onClick={() => refreshPage()}
                   style={{ background: "none" }}
                 >
                   zürŸck zür †bersicht
                 </button> */}
-                {/* {if(getRole == 1){
+              {/* {if(getRole == 1){
                   navigate("/admin/order");
                   }else{
                     navigate("/employee/order");
                   }} */}
 
-                {getRole == 1 ? <Link to="/admin/order" className="nav-link-first">zurück zur Übersicht</Link> : <Link to="/employee/order" className="nav-link-first">zurück zur Übersicht</Link>}
+              {getRole == 1 ? <Link to="/admin/order" className="nav-link-first">zurück zur Übersicht</Link> : <Link to="/employee/order" className="nav-link-first">zurück zur Übersicht</Link>}
 
-              </div>
-              <div className="btn-customer ms-3 col-12 col-md-4 col-xxl-2">
-                <div className="users-input">{values.user_name}</div>
-              </div>
-              <div className="btn-employee col-12 col-md-4 col-xxl-2">
-                <div
-                  className="dropdown"
-                  data-control="checkbox-dropdown"
-                >
-                  <label className="dropdown-label text-dark form-select user-input user-select">
-                    wahlen
-                  </label>
+            </div>
+            <div className="btn-customer ms-3 col-12 col-md-4 col-xxl-2">
+              <div className="users-input">{values.user_name}</div>
+            </div>
+            <div className="btn-employee col-12 col-md-4 col-xxl-2">
+              <div
+                className="dropdown"
+                data-control="checkbox-dropdown"
+              >
+                <label className="dropdown-label text-dark form-select user-input user-select">
+                  wahlen
+                </label>
 
-                  <div className="dropdown-list">
-                    {employeedata.length > 0 &&
-                      employeedata.map((val, index) => {
-                        return (
-                          <label
-                            className="product-option"
-                            onBlur={handleBlur}
-                            onChange={handleChange}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={
-                                empid &&
-                                empid.includes(val.id)
+                <div className="dropdown-list">
+                  {employeedata.length > 0 &&
+                    employeedata.map((val, index) => {
+                      return (
+                        <label
+                          className="product-option"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={
+                              empid &&
+                              empid.includes(val.id)
+                            }
+                            onChange={() => {
+                              const selectedProducts =
+                                empid.slice();
+                              const index = selectedProducts.indexOf(val.id);
+                              if (index > -1) {
+                                selectedProducts.splice(index, 1);
+                              } else {
+                                selectedProducts.push(val.id);
                               }
-                              onChange={() => {
-                                const selectedProducts =
-                                  empid.slice();
-                                const index = selectedProducts.indexOf(val.id);
-                                if (index > -1) {
-                                  selectedProducts.splice(index, 1);
-                                } else {
-                                  selectedProducts.push(val.id);
-                                }
-                                setEmpid(selectedProducts)
-                              }}
-                              className="dropdown-group"
-                              name="products"
-                              value={val.id}
-                              key={index.toString()}
-                              onBlur={handleBlur}
-                            />
-                            {val.fname + " " + val.lname}
-                          </label>
-                        );
-                      })}
-                  </div>
+                              setEmpid(selectedProducts)
+                            }}
+                            className="dropdown-group"
+                            name="products"
+                            value={val.id}
+                            key={index.toString()}
+                            onBlur={handleBlur}
+                          />
+                          {val.fname + " " + val.lname}
+                        </label>
+                      );
+                    })}
                 </div>
               </div>
-
-              <select
-                type="text"
-                name="orderstatus"
-                value={values.orderstatus}
-                placeholder="ZUStand auswählen"
-                className="nav-select col-12 col-md-2"
-                onChange={(e) => selectOption(e)}
-                onBlur={handleBlur}
-              >
-
-                <option className="user-option" value="" disabled>
-                  Status ändern
-                </option>
-                <option
-                  className="user-option"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value='1'
-                >
-                  Neuer Auftrag
-                </option>
-                <option
-                  className="user-option"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value='2'
-                >
-                  Wird bearbeitet
-                </option>
-                <option
-                  className="user-option"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value='3'
-                >
-                  Abgeschlossen
-                </option>
-              </select>
             </div>
 
-            <div className="div">
-              <div className="description pb-3" >
-                {/* <div className="order-field" > */}
-                <i className="bi bi-person-lines-fill user-i user-i"></i>
+            <select
+              type="text"
+              name="orderstatus"
+              value={values.orderstatus}
+              placeholder="ZUStand auswählen"
+              className="nav-select col-12 col-md-2"
+              onChange={(e) => selectOption(e)}
+              onBlur={handleBlur}
+            >
 
-                <label className="user-label">
-                  Titel: <small>*</small>
-                </label>
-                <input
-                  type="text"
-                  id="ordername"
-                  name="ordername"
-                  value={values.ordername}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="Beispiel-Aufträg, der hoch priorisiert wurde."
-                  className="user-input"
-                />
-                <div className="error">
-                  {errors.ordername && touched.ordername ? (
-                    <small className="form-error">{errors.ordername}</small>
-                  ) : null}
-                </div>
+              <option className="user-option" value="" disabled>
+                Status ändern
+              </option>
+              <option
+                className="user-option"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value='1'
+              >
+                Neuer Auftrag
+              </option>
+              <option
+                className="user-option"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value='2'
+              >
+                Wird bearbeitet
+              </option>
+              <option
+                className="user-option"
+                onChange={handleChange}
+                onBlur={handleBlur}
+                value='3'
+              >
+                Abgeschlossen
+              </option>
+            </select>
+          </div>
 
-                <div className="row">
+          <div className="div">
+            <div className="description pb-3" >
+              {/* <div className="order-field" > */}
+              <i className="bi bi-person-lines-fill user-i user-i"></i>
 
-                  <div className="col-md-12">
-                    <div className="order-field">
-                      <i className="bi bi-exclamation-triangle user-i"></i>
+              <label className="user-label">
+                Titel: <small>*</small>
+              </label>
+              <input
+                type="text"
+                id="ordername"
+                name="ordername"
+                value={values.ordername}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="Beispiel-Aufträg, der hoch priorisiert wurde."
+                className="user-input"
+              />
+              <div className="error">
+                {errors.ordername && touched.ordername ? (
+                  <small className="form-error">{errors.ordername}</small>
+                ) : null}
+              </div>
 
-                      <label className="user-label">
-                        Priorität: <small>*</small>
-                      </label>
-                      <select
-                        className="Priority user-input form-select user-select"
-                        name="orderpriority"
-                        id="orderpriority"
-                        value={values.orderpriority}
+              <div className="row">
+
+                <div className="col-md-12">
+                  <div className="order-field">
+                    <i className="bi bi-exclamation-triangle user-i"></i>
+
+                    <label className="user-label">
+                      Priorität: <small>*</small>
+                    </label>
+                    <select
+                      className="Priority user-input form-select user-select"
+                      name="orderpriority"
+                      id="orderpriority"
+                      value={values.orderpriority}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                    >
+
+                      <option className="user-option" value="" disabled>
+                        Priorität auswählen
+                      </option>
+                      <option
+                        className="user-option"
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        value="1"
                       >
-
-                        <option className="user-option" value="" disabled>
-                          Priorität auswählen
-                        </option>
-                        <option
-                          className="user-option"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value="1"
-                        >
-                          Hoch
-                        </option>
-                        <option
-                          className="user-option"
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value="0"
-                        >
-                          Standard
-                        </option>
-                      </select>
-                      <div className="error">
-                        {errors.orderpriority && touched.orderpriority ? (
-                          <small className="form-error">
-                            {errors.orderpriority}
-                          </small>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {errors.products && touched.products ? (
-                  <small className="form-error">{errors.products}</small>
-                ) : null}
-
-
-                <div className="order-field">
-                  <i className="bi bi-file-earmark-arrow-up user-i"></i>
-                  <label className="user-label">
-                    Dateien: <small>*</small>
-                  </label>
-                  <div className="file-area file-area-border">
-                    <input
-                      type="file"
-                      id="files"
-                      name="files[]"
-                      multiple="multiple"
-                      className="user-input"
-                      onChange={(event) => {
-                        const files = Array.from(event.target.files);
-                        onchangeinputorder(files);
-                        files.forEach((file) => {
-                          handleImageChange(event, file);
-                        });
-                        setFileValue(files);
-                        const fileNames = Array.from(event.target.files).map(file => { return file.name });
-                        SetFilename(fileNames); // Set the original file names separated by commas
-                      }}
-                    />
-                    <div className="user-input profile-input">
-                      <div className="success">
-                        <i className="bi bi-image"></i>    Dateien hochladen
-                      </div>
-                    </div>
-                  </div>
-                  <div className="error"></div>
-                </div>
-                <div className="img-previews">
-
-                  {fileValue.map((file, index) => (
-                    <div className="file-item" key={index}>
-                      {file.type.startsWith('image/') ?
-
-                        <img src={file.preview} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.name} />
-                        :
-                        <>
-                          <div className="d-flex flex-column" >
-                            <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
-
-                          </div>
-                        </>
-                      }
-                      <div className="cancle_icon" onClick={() => handleRemoveFile(file)}>
-                        <i class="bi bi-x-circle-fill red_icon"></i>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {
-                  fileValue.length > 0 ? <div className="ps-2 "> <progress className="custom_progress" style={{ backgroundColor: '#C0DE60' }} value={imageUploadProgress} max="100" />
-                    <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
-                }
-
-                {/* <div className="progressBar">
-              <div
-                className="progressBarFill"
-                style={{ width: `${imageUploadProgress}%` }}
-              ></div>
-            </div> */}
-
-                {getFiles &&
-                  getFiles.map((val) => (
-
-                    <div className="file-btn">
-                      <button className="downloadbtn" type="button">
-                        <i className="bi bi-download icon user-i"></i>
-                        <a
-                          download={val.orignal_name}
-                          href={`${process.env.REACT_APP_IMG_URL}/assets/neworder/${val.files}`}
-                          className="btn-text"
-                        >
-                          Download
-                        </a>
-                      </button>
-
-                      <button
-                        className="ms-2 deletebtn p-2"
-                        id={id}
-                        onClick={() => deletFile(val.files)}
-                        type="button"
+                        Hoch
+                      </option>
+                      <option
+                        className="user-option"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value="0"
                       >
-                        <i className="bi bi-trash icon user-i"></i>
-                        <span className="btn-text"> löschen </span>
-                      </button>
-                      <div className="d-flex align-items-center"><b className="ms-5">{val === null ? '' : `${val.orignal_name}` && `${val.orignal_name}`} </b></div>
-
+                        Standard
+                      </option>
+                    </select>
+                    <div className="error">
+                      {errors.orderpriority && touched.orderpriority ? (
+                        <small className="form-error">
+                          {errors.orderpriority}
+                        </small>
+                      ) : null}
                     </div>
-
-                  ))}
-
-
-                <div className="order-field order-field1">
-                  <i className="bi bi-person-vcard user-i"></i>
-
-                  <label className="user-label">
-                    Briefing: <small>*</small>
-                  </label>
-
-                  <textarea
-                    className="user-input user-textarea"
-                    placeholder="Briefing zu dem Auftrag..."
-                    name="orderdetail"
-                    id="orderdetail"
-                    value={values.orderdetail}
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                  ></textarea>
-                  <div className="error">
-                    {errors.orderdetail && touched.orderdetail ? (
-                      <small className="form-error">{errors.orderdetail}</small>
-                    ) : null}
                   </div>
                 </div>
-
-              </div>
-            </div>
-          </form>
-
-          {/* chat */}
-          <div className="div">
-            <div className="description">
-              <h1 className="">Chat</h1>
-              {/* main chat part */}
-              <div className="main-chat custom-scrollbar" ref={chatBoxRef}  >
-                {Usermsg.length > 0
-                  ? Usermsg.map((val, index) => {
-
-                    return (
-                      <div className={val.role === 0 ? ' row chat-box user' : ' row chat-box admin'} key={val.id} >
-                        {val.role === 0 ? (
-                          <React.Fragment>
-                            {/* profile img part */}
-                            <div className="col-lg-1 view-order-img">
-                              {val.userImg ? <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/` + `${val.userImg}`} /> : <div style={{ height: "50px", width: "50px", borderRadius: "50%", background: "grey" }}></div>}
-                            </div>
-                            {/* message part */}
-                            <div className=" chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
-                              <div className="chat-box-one u1 pt-0">
-                                <p className="chat-date d-flex justify-content-between">
-                                  <div> <span style={{ color: '#ffd279' }}>{val.name} </span><span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
-                                  {
-                                    getRole == 1 ? (<i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>) : ""
-
-                                  }
-
-                                </p>
-                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
-                                  {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
-
-                                    (val.files && val.message == null) && <ChatImgPart val={val} /> ||
-
-                                    (val.message && val.files) && ((val.message && val.message != null &&
-
-                                      <span>
-                                        <ChatImgPart val={val} />
-                                        {/* <App val={val} /> */}
-                                        {val.message.toString()}
-                                      </span>
-
-                                    ))
-                                  }
-                                </p>
-                                <p className="chat_time"><span className="ps-2">{moment(val.createdAt).format("HH:mm")}</span></p>
-                              </div>
-                            </div>
-                          </React.Fragment>
-                        ) : (
-                          <React.Fragment>
-                            <div className="chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
-
-                              <div className="chat-box-two u2 pt-0">
-                                <p className="chat-date d-flex justify-content-between">
-                                  <div>  {val.role === 2 ? (
-                                    <span style={{ color: '#53bdeb' }}>{val.name}</span>
-                                  ) : (
-                                    <span style={{ color: '#C0DE60' }}>{val.name}</span>
-                                  )}<span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
-                                  <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
-                                </p>
-                                <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
-                                  {/* {val.message.toString()} */}
-                                  {
-                                    (val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
-
-                                    (val.files && val.message == null) && <ChatImgPart val={val} /> ||
-
-                                    (val.message && val.files) && ((val.message && val.message != null &&
-
-                                      <span>
-                                        <ChatImgPart val={val} />
-                                        {val.message.toString()}
-                                      </span>
-                                    ))
-                                  }
-                                </p>
-                                <p className="chat_time"><span className="ps-2">{moment(val.createdAt).format("HH:mm")}</span></p>
-                              </div>
-                            </div>
-                            <div className="col-lg-1 view-order-img">
-                              {val.userImg ? <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/` + `${val.userImg}`} /> : <div style={{ height: "50px", width: "50px", borderRadius: "50%", background: "grey" }}></div>}
-
-                            </div>
-                          </React.Fragment>
-                        )}
-                        {/* Scroll to Bottom button */}
-
-
-
-                      </div>
-                    );
-                  })
-                  : null}
               </div>
 
-              {/* image preview part */}
-              <div className="img-previews pt-3">
-                {chatImg.map((file, index) => (
+              {errors.products && touched.products ? (
+                <small className="form-error">{errors.products}</small>
+              ) : null}
+
+
+              <div className="order-field">
+                <i className="bi bi-file-earmark-arrow-up user-i"></i>
+                <label className="user-label">
+                  Dateien: <small>*</small>
+                </label>
+                <div className="file-area file-area-border">
+                  <input
+                    type="file"
+                    id="files"
+                    name="files[]"
+                    multiple="multiple"
+                    className="user-input"
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files);
+                      onchangeinputorder(files);
+                      files.forEach((file) => {
+                        handleImageChange(event, file);
+                      });
+                      setFileValue(files);
+                      const fileNames = Array.from(event.target.files).map(file => { return file.name });
+                      SetFilename(fileNames); // Set the original file names separated by commas
+                    }}
+                  />
+                  <div className="user-input profile-input">
+                    <div className="success">
+                      <i className="bi bi-image"></i>    Dateien hochladen
+                    </div>
+                  </div>
+                </div>
+                <div className="error"></div>
+              </div>
+              <div className="img-previews">
+
+                {fileValue.map((file, index) => (
                   <div className="file-item" key={index}>
-                    {file.type.startsWith('image/') ? (<img src={file.preview} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.name} />) : file.type.startsWith('video/') ? (
-                      <>
-                        <div className="d-flex flex-column" >
-                          <i class="bi bi-file-earmark-play-fill" title={file.name} ></i>
+                    {file.type.startsWith('image/') ?
 
-                        </div>
-                      </>
-                    ) : file.type.endsWith('/zip') ? (<>
-                      <div className="d-flex flex-column" >
-                        <i class="bi bi-file-earmark-zip-fill" title={file.name} ></i>
-
-                      </div>
-                    </>) : (
+                      <img src={file.preview} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.name} />
+                      :
                       <>
                         <div className="d-flex flex-column" >
                           <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
 
                         </div>
                       </>
-                    )
-
                     }
-                    <div className="cancle_icon" onClick={() => handleRemoveImg(file)}>
+                    <div className="cancle_icon" onClick={() => handleRemoveFile(file)}>
                       <i class="bi bi-x-circle-fill red_icon"></i>
                     </div>
                   </div>
                 ))}
-                {/* progress bar part */}
-
-
               </div>
+
               {
-                chatImg.length > 0 && <div className="ps-2" style={{ width: `${100 * chatImg.length}px` }}>
-                  <progress value={imageUploadProgress} max="100" />
-                  <span className="ps-2">{`${imageUploadProgress}%`}</span>
-                </div>
+                fileValue.length > 0 ? <div className="ps-2 "> <progress className="custom_progress" style={{ backgroundColor: '#C0DE60' }} value={imageUploadProgress} max="100" />
+                  <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
               }
 
-              {/* chat input fields part */}
-              <div className="row pt-2 pb-2 position-relative">
+              {/* <div className="progressBar">
+              <div
+                className="progressBarFill"
+                style={{ width: `${imageUploadProgress}%` }}
+              ></div>
+            </div> */}
 
-                {/* upload file */}
-                <div className="col-lg-1 emoji_file" >
+              {getFiles &&
+                getFiles.map((val) => (
 
-                  <div className="order-field1 d-flex ">
-                    {/* emoji */}
-                    {
-                      showEmoji &&
-                      <button className="col-lg-1 me-2" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
-                        <i className="bi bi-x-lg fs-5"></i>
-                      </button>
-                    }
-                    <button className="col-lg-1" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
-                      <i className="bi bi-emoji-smile fs-5"></i>
+                  <div className="file-btn">
+                    <button className="downloadbtn" type="button">
+                      <i className="bi bi-download icon user-i"></i>
+                      <a
+                        download={val.orignal_name}
+                        href={`${process.env.REACT_APP_IMG_URL}/assets/neworder/${val.files}`}
+                        className="btn-text"
+                      >
+                        Download
+                      </a>
                     </button>
-                    {
-                      showEmoji && <div class="emoji-wrapper">
 
-                        <EmojiPicker onEmojiClick={(emojiData, event) => {
-                          handleInsertEmoji(emojiData.emoji)
-                        }}
+                    <button
+                      className="ms-2 deletebtn p-2"
+                      id={id}
+                      onClick={() => deletFile(val.files)}
+                      type="button"
+                    >
+                      <i className="bi bi-trash icon user-i"></i>
+                      <span className="btn-text"> löschen </span>
+                    </button>
+                    <div className="d-flex align-items-center"><b className="ms-5">{val === null ? '' : `${val.orignal_name}` && `${val.orignal_name}`} </b></div>
 
-                          theme="dark"
-                          emojiStyle="google"
-                        />
+                  </div>
+
+                ))}
+
+
+              <div className="order-field order-field1">
+                <i className="bi bi-person-vcard user-i"></i>
+
+                <label className="user-label">
+                  Briefing: <small>*</small>
+                </label>
+
+                <textarea
+                  className="user-input user-textarea"
+                  placeholder="Briefing zu dem Auftrag..."
+                  name="orderdetail"
+                  id="orderdetail"
+                  value={values.orderdetail}
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                ></textarea>
+                <div className="error">
+                  {errors.orderdetail && touched.orderdetail ? (
+                    <small className="form-error">{errors.orderdetail}</small>
+                  ) : null}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </form>
+
+        {/* chat */}
+        <div className="div">
+          <div className="description">
+            <h1 className="">Chat</h1>
+            {/* main chat part */}
+            <div className="main-chat custom-scrollbar" ref={chatBoxRef}  >
+              {Usermsg.length > 0
+                ? Usermsg.map((val, index) => {
+
+                  return (
+                    <div className={val.role === 0 ? ' row chat-box user' : ' row chat-box admin'} key={val.id} >
+                      {val.role === 0 ? (
+                        <React.Fragment>
+                          {/* profile img part */}
+                          <div className="col-lg-1 view-order-img">
+                            {val.userImg ? <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/` + `${val.userImg}`} /> : <div style={{ height: "50px", width: "50px", borderRadius: "50%", background: "grey" }}></div>}
+                          </div>
+                          {/* message part */}
+                          <div className=" chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
+                            <div className="chat-box-one u1 pt-0">
+                              <p className="chat-date d-flex justify-content-between">
+                                <div> <span style={{ color: '#ffd279' }}>{val.name} </span><span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
+                                {
+                                  getRole == 1 ? (<i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>) : ""
+
+                                }
+
+                              </p>
+                              <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
+                                {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
+
+                                  (val.files && val.message == null) && <ChatImgPart val={val} /> ||
+
+                                  (val.message && val.files) && ((val.message && val.message != null &&
+
+                                    <span>
+                                      <ChatImgPart val={val} />
+                                      {/* <App val={val} /> */}
+                                      {val.message.toString()}
+                                    </span>
+
+                                  ))
+                                }
+                              </p>
+                              <p className="chat_time"><span className="ps-2">{moment(val.createdAt).format("HH:mm")}</span></p>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      ) : (
+                        <React.Fragment>
+                          <div className="chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
+
+                            <div className="chat-box-two u2 pt-0">
+                              <p className="chat-date d-flex justify-content-between">
+                                <div>  {val.role === 2 ? (
+                                  <span style={{ color: '#53bdeb' }}>{val.name}</span>
+                                ) : (
+                                  <span style={{ color: '#C0DE60' }}>{val.name}</span>
+                                )}<span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
+                                <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
+                              </p>
+                              <p style={{ whiteSpace: "break-spaces", wordBreak: 'break-word' }}>
+                                {/* {val.message.toString()} */}
+                                {
+                                  (val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
+
+                                  (val.files && val.message == null) && <ChatImgPart val={val} /> ||
+
+                                  (val.message && val.files) && ((val.message && val.message != null &&
+
+                                    <span>
+                                      <ChatImgPart val={val} />
+                                      {val.message.toString()}
+                                    </span>
+                                  ))
+                                }
+                              </p>
+                              <p className="chat_time"><span className="ps-2">{moment(val.createdAt).format("HH:mm")}</span></p>
+                            </div>
+                          </div>
+                          <div className="col-lg-1 view-order-img">
+                            {val.userImg ? <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/` + `${val.userImg}`} /> : <div style={{ height: "50px", width: "50px", borderRadius: "50%", background: "grey" }}></div>}
+
+                          </div>
+                        </React.Fragment>
+                      )}
+                      {/* Scroll to Bottom button */}
+
+
+
+                    </div>
+                  );
+                })
+                : null}
+            </div>
+
+            {/* image preview part */}
+            <div className="img-previews pt-3">
+              {chatImg.map((file, index) => (
+                <div className="file-item" key={index}>
+                  {file.type.startsWith('image/') ? (<img src={file.preview} alt="Preview" style={{ height: "100px", width: "100px" }} title={file.name} />) : file.type.startsWith('video/') ? (
+                    <>
+                      <div className="d-flex flex-column" >
+                        <i class="bi bi-file-earmark-play-fill" title={file.name} ></i>
+
                       </div>
-                    }
-                    <div className="file-area fileupload">
-                      <input
-                        type="file"
-                        id="orderfile"
-                        name="files"
-                        className="user-input"
-                        style={{ background: 'transparent', cursor: 'pointer' }}
-                        ref={fileInputRef}
-                        onChange={(event) => {
-                          const files = Array.from(event.target.files);
-                          onchangeinput(files);
-                          files.forEach((file) => {
-                            handleImage(event, file);
-                          });
-                          setChatImg(files);
-                        }}
-                        multiple
+                    </>
+                  ) : file.type.endsWith('/zip') ? (<>
+                    <div className="d-flex flex-column" >
+                      <i class="bi bi-file-earmark-zip-fill" title={file.name} ></i>
+
+                    </div>
+                  </>) : (
+                    <>
+                      <div className="d-flex flex-column" >
+                        <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
+
+                      </div>
+                    </>
+                  )
+
+                  }
+                  <div className="cancle_icon" onClick={() => handleRemoveImg(file)}>
+                    <i class="bi bi-x-circle-fill red_icon"></i>
+                  </div>
+                </div>
+              ))}
+              {/* progress bar part */}
+
+
+            </div>
+            {
+              chatImg.length > 0 && <div className="ps-2" style={{ width: `${100 * chatImg.length}px` }}>
+                <progress value={imageUploadProgress} max="100" />
+                <span className="ps-2">{`${imageUploadProgress}%`}</span>
+              </div>
+            }
+
+            {/* chat input fields part */}
+            <div className="row pt-2 pb-2 position-relative">
+
+              {/* upload file */}
+              <div className="col-lg-1 emoji_file" >
+
+                <div className="order-field1 d-flex ">
+                  {/* emoji */}
+                  {
+                    showEmoji &&
+                    <button className="col-lg-1 me-2" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
+                      <i className="bi bi-x-lg fs-5"></i>
+                    </button>
+                  }
+                  <button className="col-lg-1" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
+                    <i className="bi bi-emoji-smile fs-5"></i>
+                  </button>
+                  {
+                    showEmoji && <div class="emoji-wrapper">
+
+                      <EmojiPicker onEmojiClick={(emojiData, event) => {
+                        handleInsertEmoji(emojiData.emoji)
+                      }}
+
+                        theme="dark"
+                        emojiStyle="google"
                       />
+                    </div>
+                  }
+                  <div className="file-area fileupload">
+                    <input
+                      type="file"
+                      id="orderfile"
+                      name="files"
+                      className="user-input"
+                      style={{ background: 'transparent', cursor: 'pointer' }}
+                      ref={fileInputRef}
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files);
+                        onchangeinput(files);
+                        files.forEach((file) => {
+                          handleImage(event, file);
+                        });
+                        setChatImg(files);
+                      }}
+                      multiple
+                    />
 
 
-                      <div className="user-input profile-input  " style={{ background: 'transparent', cursor: 'pointer' }}>
-                        <div className="success ">
-                          <i className="bi bi-paperclip h4 mb-0" style={{ verticalAlign: '-webkit-baseline-middle', cursor: 'pointer' }}></i>
-                        </div>
+                    <div className="user-input profile-input  " style={{ background: 'transparent', cursor: 'pointer' }}>
+                      <div className="success ">
+                        <i className="bi bi-paperclip h4 mb-0" style={{ verticalAlign: '-webkit-baseline-middle', cursor: 'pointer' }}></i>
                       </div>
                     </div>
                   </div>
                 </div>
-                {/* text part */}
-                <div className="col-lg-9  ">
+              </div>
+              {/* text part */}
+              <div className="col-lg-9  ">
 
 
-                  <div class="input-group">
-                    <textarea
-                      type="text"
-                      placeholder="Deine Nachricht an den Designer..."
-                      className="form-control user-input"
-                      value={message}
-                      style={{ minHeight: '42px' }}
-                      name="message"
-                      onChange={(e) => { setMessage(e.target.value) }}
-                      required
+                <div class="input-group">
+                  <textarea
+                    type="text"
+                    placeholder="Deine Nachricht an den Designer..."
+                    className="form-control user-input"
+                    value={message}
+                    style={{ minHeight: '42px' }}
+                    name="message"
+                    onChange={(e) => { setMessage(e.target.value) }}
+                    required
 
-                      id="messageInput"
-                      ref={textareaRef}
-                    ></textarea>
-                    <div className="input-group-append " ref={dropdownRef}>
-                      <button type="button" className="btn chat-btn border-0 btn-outline-secondary dropdown-toggle dropdown-toggle-split rounded-right" onClick={toggleDropdown} style={{ height: '42px' }} aria-haspopup="true" aria-expanded={isDropdownOpen}>
-                        <span className="sr-only">Toggle Dropdown</span>
-                      </button>
-                      {isDropdownOpen && (
+                    id="messageInput"
+                    ref={textareaRef}
+                  ></textarea>
+                  <div className="input-group-append " ref={dropdownRef}>
+                    <button type="button" className="btn chat-btn border-0 btn-outline-secondary dropdown-toggle dropdown-toggle-split rounded-right" onClick={toggleDropdown} style={{ height: '42px' }} aria-haspopup="true" aria-expanded={isDropdownOpen}>
+                      <span className="sr-only">Toggle Dropdown</span>
+                    </button>
+                    {isDropdownOpen && (
 
-                        <div className="dropdown-menu  chat-drop d-block  p-0" >
-                          <div className="input-group mb-3">
-                            <textarea
-                              type="text"
-                              placeholder="Type something...."
-                              className="form-control user-input"
-                              name="message"
-                              required
-                              id="messageInput"
-                              value={message1}
-                              style={{ minHeight: '42px' }}
-                              onChange={handleTextareaChange}
+                      <div className="dropdown-menu  chat-drop d-block  p-0" >
+                        <div className="input-group mb-3">
+                          <textarea
+                            type="text"
+                            placeholder="Type something...."
+                            className="form-control user-input"
+                            name="message"
+                            required
+                            id="messageInput"
+                            value={message1}
+                            style={{ minHeight: '42px' }}
+                            onChange={handleTextareaChange}
 
-                            ></textarea>
-                            <div className="input-group-append">
-                              <button className="btn  chat-add-button" style={{ height: '42px' }} onClick={handleButtonClick}><BsPlus style={{ fontSize: '15px' }} /></button>
-
-                            </div>
+                          ></textarea>
+                          <div className="input-group-append">
+                            <button className="btn  chat-add-button" style={{ height: '42px' }} onClick={handleButtonClick}><BsPlus style={{ fontSize: '15px' }} /></button>
 
                           </div>
-                          {error && <p className="error-message" style={{ color: 'red', fontSize: '12px', margin: '-1rem,0px' }}>{error}</p>}
 
-                          {isLoaded ? (
-                            <div className="chat-drop custom-scrollbar">
-                              {chatdata.map((item) => (
+                        </div>
+                        {error && <p className="error-message" style={{ color: 'red', fontSize: '12px', margin: '-1rem,0px' }}>{error}</p>}
 
-                                <span className="dropdown-item chat-drop" key={item.id} >
-                                  <div className="input-group justify-content-between ">
-                                    {editdisabled && editid == item.id ? (
-                                      <div>
-                                        <input type="text" className="form-control user-input mb-2" name="editheadmessage" onChange={handleEditheadChange} defaultValue={editheadmessage1} placeholder="Message Heading" />
-                                        <textarea
-                                          type="text"
-                                          placeholder="Type something...."
-                                          className="form-control user-input edit_textarea"
-                                          name="editmessage"
-                                          required
-                                          id="messageInput"
-                                          defaultValue={editmessage1}
+                        {isLoaded ? (
+                          <div className="chat-drop custom-scrollbar">
+                            {chatdata.map((item) => (
 
-                                          onChange={handleEditTextareaChange}
+                              <span className="dropdown-item chat-drop" key={item.id} >
+                                <div className="input-group justify-content-between ">
+                                  {editdisabled && editid == item.id ? (
+                                    <div>
+                                      <input type="text" className="form-control user-input mb-2" name="editheadmessage" onChange={handleEditheadChange} defaultValue={editheadmessage1} placeholder="Message Heading" />
+                                      <textarea
+                                        type="text"
+                                        placeholder="Type something...."
+                                        className="form-control user-input edit_textarea"
+                                        name="editmessage"
+                                        required
+                                        id="messageInput"
+                                        defaultValue={editmessage1}
 
-                                        ></textarea>
-                                      </div>
+                                        onChange={handleEditTextareaChange}
 
-
-                                    ) : (
-                                      <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} > {item.msg_title != null ? item.msg_title.length > 10
-                                        ? item.msg_title.slice(0, 10) + '...'
-                                        : item.msg_title : "No heading"}</span>
-                                    )}
-
-                                    <div className="input-group-append" style={getRole == 1 ? { display: "block" } : { display: "none" }}>
-                                      {editdisabled && editid == item.id ? (
-                                        <div className="edit_icons">
-                                          <i class="bi bi-check-lg mx-1" onClick={() => handleEditClick(item.id)} style={{ cursor: 'pointer', color: '#C0DE60' }}></i>
-                                          <i class="bi bi-x-lg user-i fs-6" onClick={() => handleEditcancelClick(item.id)} style={{ cursor: 'pointer', color: '#DE6060' }}></i>
-                                        </div>
-                                      ) : (
-
-                                        <div className="old_icon">
-                                          <i className="fa-regular fa-pen-to-square mx-1" onClick={() => handleDropdownEdit(item)} style={{ cursor: 'pointer' }}></i>
-
-                                          <i class="fa-solid fa-trash mx-1" onClick={() => handleChatdeleteClick(item.id)} style={{ cursor: 'pointer' }}></i>
-                                        </div>
-                                      )}
+                                      ></textarea>
                                     </div>
 
+
+                                  ) : (
+                                    <span style={{ cursor: 'pointer' }} onClick={() => handleDropdownItemClick(item)} > {item.msg_title != null ? item.msg_title.length > 10
+                                      ? item.msg_title.slice(0, 10) + '...'
+                                      : item.msg_title : "No heading"}</span>
+                                  )}
+
+                                  <div className="input-group-append" style={getRole == 1 ? { display: "block" } : { display: "none" }}>
+                                    {editdisabled && editid == item.id ? (
+                                      <div className="edit_icons">
+                                        <i class="bi bi-check-lg mx-1" onClick={() => handleEditClick(item.id)} style={{ cursor: 'pointer', color: '#C0DE60' }}></i>
+                                        <i class="bi bi-x-lg user-i fs-6" onClick={() => handleEditcancelClick(item.id)} style={{ cursor: 'pointer', color: '#DE6060' }}></i>
+                                      </div>
+                                    ) : (
+
+                                      <div className="old_icon">
+                                        <i className="fa-regular fa-pen-to-square mx-1" onClick={() => handleDropdownEdit(item)} style={{ cursor: 'pointer' }}></i>
+
+                                        <i class="fa-solid fa-trash mx-1" onClick={() => handleChatdeleteClick(item.id)} style={{ cursor: 'pointer' }}></i>
+                                      </div>
+                                    )}
                                   </div>
 
+                                </div>
 
-                                  {/* <textarea value={item.msg_content}></textarea> */}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <p>Loading...</p>
-                          )}
-                          {/* <a className="dropdown-item" href="#">
+
+                                {/* <textarea value={item.msg_content}></textarea> */}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <p>Loading...</p>
+                        )}
+                        {/* <a className="dropdown-item" href="#">
                             Action
                           </a>
                           <a className="dropdown-item" href="#">
@@ -1866,275 +2000,275 @@ export default function () {
                           <a className="dropdown-item" href="#">
                             Something else here
                           </a> */}
-                        </div>
-                      )}
-                    </div>
-
+                      </div>
+                    )}
                   </div>
 
                 </div>
 
-
-
-
-
-
-                {/* send message */}
-                <div className="col-lg-2 ">
-                  <button
-                    type="button"
-                    className="chat-btn justify-content-center d-flex align-items-center px-2"
-                    onClick={sendText}
-                    disabled={sendBtn == true ? true : false}
-                    style={{ width: '100%' }}
-                  >
-                    <i class="bi bi-send-fill"></i>
-                    <b className="btn-text">{buttontext}</b>
-                  </button>
-                </div>
               </div>
 
+
+
+
+
+
+              {/* send message */}
+              <div className="col-lg-2 ">
+                <button
+                  type="button"
+                  className="chat-btn justify-content-center d-flex align-items-center px-2"
+                  onClick={sendText}
+                  disabled={sendBtn == true ? true : false}
+                  style={{ width: '100%' }}
+                >
+                  <i class="bi bi-send-fill"></i>
+                  <b className="btn-text">{buttontext}</b>
+                </button>
+              </div>
             </div>
+
           </div>
+        </div>
 
-          {/* cloud files */}
-          <div className="div">
-            <div className="description">
-              <div className="row">
-                <div className="col">
-                  <h3 className="">Link zu den finalen Dateien</h3>
+        {/* cloud files */}
+        <div className="div">
+          <div className="description">
+            <div className="row">
+              <div className="col">
+                <h3 className="">Link zu den finalen Dateien</h3>
 
-                  {/* show cloud links */}
-                  {file && file.map((val) => {
-                    if (val.isLink) {
-                      return (
-                        <div className="file-btn row " key={val.id}>
-                          <div className={inputshow && linkvalue.id == val.id ? 'd-none' : 'd-block d-lg-flex'} style={{ width: '100%' }}>
-                            <div className="col-12 col-md-12 col-lg-9">
-                              <button className="downloadbtn cloud-link-download-btn" type="button" style={{ height: '100%', maxWidth: '' }}>
-                                <i className="bi bi-download icon user-i"></i>
-                                <a
-                                  target="_blank"
-                                  href={val.link}
-                                  className="btn-text"
-                                >
-                                  {val.link}
-                                </a>
-                              </button>
-                            </div>
-                            <div className="col-12 col-md-12 col-lg-3">
-
-                              {getRole == 2 | getRole == 1 && (
-                                <div className="d-flex" style={{ height: '100%' }}>
-                                  <button
-                                    className="ms-lg-2 p-1 p-lg-2 editbtn me-2 me-sm-2"
-                                    id={id}
-                                    onClick={() => EditCloudLink(val)}
-                                    type="button" style={{ width: '100%' }}
-                                  >
-                                    <i className="fa-regular fa-pen-to-square mx-1"></i>
-                                    <span className="btn-text"> bearbeiten </span>
-                                  </button>
-                                  <button
-                                    className="ms-lg-2 p-1 p-lg-2 deletebtn"
-                                    id={id}
-                                    onClick={() => DeleteCloudLink(val)}
-                                    type="button" style={{ width: '100%' }}
-                                  >
-                                    <i className="bi bi-trash icon user-i"></i>
-                                    <span className="btn-text"> löschen </span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-
+                {/* show cloud links */}
+                {file && file.map((val) => {
+                  if (val.isLink) {
+                    return (
+                      <div className="file-btn row " key={val.id}>
+                        <div className={inputshow && linkvalue.id == val.id ? 'd-none' : 'd-block d-lg-flex'} style={{ width: '100%' }}>
+                          <div className="col-12 col-md-12 col-lg-9">
+                            <button className="downloadbtn cloud-link-download-btn" type="button" style={{ height: '100%', maxWidth: '' }}>
+                              <i className="bi bi-download icon user-i"></i>
+                              <a
+                                target="_blank"
+                                href={val.link}
+                                className="btn-text"
+                              >
+                                {val.link}
+                              </a>
+                            </button>
                           </div>
-                          <div className={inputshow && linkvalue.id == val.id ? 'd-block d-lg-flex ' : 'd-none'}>
-                            <div className="col-12 col-md-8 col-lg-9">
-                              <input type="text" placeholder="Link"
-                                className=" border-2 border-gray px-2 my-1 user-input"
-                                defaultValue={linkvalue.link}
-                                style={{ width: "100%" }}
-                                onChange={(e) => CloudLinkChange(e)}
-                                ref={ref1}
-                              />
-                            </div>
-                            <div className="col-12 col-lg-3">
+                          <div className="col-12 col-md-12 col-lg-3">
 
+                            {getRole == 2 | getRole == 1 && (
                               <div className="d-flex" style={{ height: '100%' }}>
                                 <button
-                                  className="ms-2 p-2 editbtn"
-                                  id={linkvalue.id}
-                                  onClick={() => UpdateCloudLink(linkvalue)}
+                                  className="ms-lg-2 p-1 p-lg-2 editbtn me-2 me-sm-2"
+                                  id={id}
+                                  onClick={() => EditCloudLink(val)}
                                   type="button" style={{ width: '100%' }}
                                 >
                                   <i className="fa-regular fa-pen-to-square mx-1"></i>
-                                  <span className="btn-text"> speichern </span>
+                                  <span className="btn-text"> bearbeiten </span>
                                 </button>
                                 <button
-                                  className="ms-2 p-2 deletebtn"
-                                  id={linkvalue.id}
-                                  onClick={() => canceleditLink(linkvalue)}
+                                  className="ms-lg-2 p-1 p-lg-2 deletebtn"
+                                  id={id}
+                                  onClick={() => DeleteCloudLink(val)}
                                   type="button" style={{ width: '100%' }}
                                 >
                                   <i className="bi bi-trash icon user-i"></i>
-                                  <span className="btn-text"> Stornieren </span>
+                                  <span className="btn-text"> löschen </span>
                                 </button>
                               </div>
+                            )}
+                          </div>
 
+                        </div>
+                        <div className={inputshow && linkvalue.id == val.id ? 'd-block d-lg-flex ' : 'd-none'}>
+                          <div className="col-12 col-md-8 col-lg-9">
+                            <input type="text" placeholder="Link"
+                              className=" border-2 border-gray px-2 my-1 user-input"
+                              defaultValue={linkvalue.link}
+                              style={{ width: "100%" }}
+                              onChange={(e) => CloudLinkChange(e)}
+                              ref={ref1}
+                            />
+                          </div>
+                          <div className="col-12 col-lg-3">
+
+                            <div className="d-flex" style={{ height: '100%' }}>
+                              <button
+                                className="ms-2 p-2 editbtn"
+                                id={linkvalue.id}
+                                onClick={() => UpdateCloudLink(linkvalue)}
+                                type="button" style={{ width: '100%' }}
+                              >
+                                <i className="fa-regular fa-pen-to-square mx-1"></i>
+                                <span className="btn-text"> speichern </span>
+                              </button>
+                              <button
+                                className="ms-2 p-2 deletebtn"
+                                id={linkvalue.id}
+                                onClick={() => canceleditLink(linkvalue)}
+                                type="button" style={{ width: '100%' }}
+                              >
+                                <i className="bi bi-trash icon user-i"></i>
+                                <span className="btn-text"> Stornieren </span>
+                              </button>
                             </div>
-
 
                           </div>
 
 
                         </div>
-                      );
-                    }
-                  })}
 
 
-                  {/* add cloud links */}
-                  <div className="mt-1">
-                    {[...Array(cloudLink.length)].map((val, i) => {
-                      return (<div className="row d-flex justify-content-between">
-                        <div className="col-12 col-lg-9 pe-1">
-                          <input key={i + 1} type="text" placeholder="Link"
-                            className="  border-2 border-gray px-2 form-control my-1 user-input"
-                            value={cloudLink.links[i]?.link || ''}
-                            onChange={(e) => CloudLinkHandleChange(e, i, "link")}
+                      </div>
+                    );
+                  }
+                })}
 
-                            ref={ref1}
-                          />
-                        </div>
-                        {/* <input key={-i - 1} type="text" placeholder="Link Name"
+
+                {/* add cloud links */}
+                <div className="mt-1">
+                  {[...Array(cloudLink.length)].map((val, i) => {
+                    return (<div className="row d-flex justify-content-between">
+                      <div className="col-12 col-lg-9 pe-1">
+                        <input key={i + 1} type="text" placeholder="Link"
+                          className="  border-2 border-gray px-2 form-control my-1 user-input"
+                          value={cloudLink.links[i]?.link || ''}
+                          onChange={(e) => CloudLinkHandleChange(e, i, "link")}
+
+                          ref={ref1}
+                        />
+                      </div>
+                      {/* <input key={-i - 1} type="text" placeholder="Link Name"
                           className=" border-2 border-gray px-2 my-1 user-input"
                           value={cloudLink.links[i]?.link_name || ''}
                           onChange={(e) => CloudLinkHandleChange(e, i, "link_name")}
                           style={{ width: "28%" }}
                           ref={ref2}
                         /> */}
-                        <div className=" col-12 col-lg-3 ps-0">
-                          <button type="submit" className=" justify-content-center d-flex login-btn mt-1 ms-1" onClick={() => AddCloudLink()} style={{ width: '-webkit-fill-available' }}>
-                            <i className="bi bi-box-arrow-in-right icon" style={{ margin: 'auto 0px' }}></i>
-                            <b className="btn-text" style={{ margin: 'auto 0px' }}> Dateien hochladen</b>
-                          </button>
-                        </div>
+                      <div className=" col-12 col-lg-3 ps-0">
+                        <button type="submit" className=" justify-content-center d-flex login-btn mt-1 ms-1" onClick={() => AddCloudLink()} style={{ width: '-webkit-fill-available' }}>
+                          <i className="bi bi-box-arrow-in-right icon" style={{ margin: 'auto 0px' }}></i>
+                          <b className="btn-text" style={{ margin: 'auto 0px' }}> Dateien hochladen</b>
+                        </button>
+                      </div>
 
-                      </div>)
-                    })}
+                    </div>)
+                  })}
 
-                  </div>
+                </div>
 
-                  {/* <button className="mt-2" style={{ all: "unset", cursor: "pointer" }} onClick={() => AddLink()} >
+                {/* <button className="mt-2" style={{ all: "unset", cursor: "pointer" }} onClick={() => AddLink()} >
                     <i class="bi bi-plus-circle fs-6 mx-2"></i>
                     <span> Add Link</span>
                   </button> */}
 
-                </div>
               </div>
             </div>
           </div>
-
-          {/* final files */}
-          <div className="div">
-            <div className="description">
-              <div className="row">
-                {/* local files */}
-                <div class="col-12">
-                  <h3 className="">Dateien zum Download</h3>
-                  {file && file.map((val) => {
-
-                    return !val.isLink && <div className="file-btn h-auto">
-                      <button className="downloadbtn p-2" style={{ height: '100%' }} type="button">
-                        <i className="bi bi-download icon user-i"></i>
-                        <a
-                          download={val.orignal_name}
-                          href={
-                            `${process.env.REACT_APP_IMG_URL}/assets/neworder/` +
-                            `${val.file}`
-                          }
-                          className="btn-text"
-                        >
-                          Download
-                        </a>
-                      </button>
-
-                      <button className="ms-2 deletebtn p-2" id={id}
-                        onClick={() => clickToDelete(val)}
-                        type="button">
-                        <i className="bi bi-trash icon user-i"></i>
-                        <span className="btn-text"> löschen </span>
-                      </button>
-                      <div className="align-items-center d-flex"><b className="ms-5">{val === null ? "" : `${val}` && `${val.orignal_name}`}</b></div>
-
-
-                    </div>
-                  })}
-
-                  <div className="img-previews">
-                    {filesValues.map((file, index) => (
-                      <div className="file-item" key={index}>
-                        {file.type.startsWith('image/') ?
-                          <img src={URL.createObjectURL(file)} alt="preview" style={{ height: "100px", width: "100px" }} title={file.name} />
-                          :
-                          <div className="d-flex flex-column" >
-                            <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
-                          </div>
-                        }
-                        <div className="cancle_icon" onClick={() => handleRemoveFiles(file)}>
-                          <i class="bi bi-x-circle-fill red_icon"></i>
-                        </div>
-                      </div>
-                    ))}
-
-                  </div>
-                  {
-                    filesValues.length > 0 ? <div className="ps-2" > <progress value={imageUploadProgress} max="100" />
-                      <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
-                  }
-                  <div className="order-field">
-                    <div className="file-area d-lg-flex ">
-                      <div className=" col-12 col-lg-9">
-                        <input
-                          type="file"
-                          id="orderfile"
-                          name="files[]"
-                          multiple="multiple"
-                          className="user-input"
-                          onChange={(event) => {
-                            setFilesValues(Array.from(event.target.files));
-                            const fileNames = Array.from(event.target.files).map(file => { return file.name });
-                            SetFilename(fileNames); // Set the original file names separated by commas
-
-                          }}
-                        />
-                        <div className="user-input profile-input">
-                          <div className="success">
-                            <i className="bi bi-image"></i>   Dateien hochladen
-                          </div>
-                        </div>
-                      </div>
-
-
-                      <div className="col-12 mt-2 mt-lg-0 col-lg-3">
-                        <button type="submit" className="justify-content-center d-flex login-btn ms-lg-2" style={{ width: "-webkit-fill-available" }} onClick={() => { AddFile() }}>
-                          <i className="bi bi-box-arrow-in-right icon" style={{ margin: 'auto 0px' }}></i>
-                          <b className="btn-text" style={{ margin: 'auto 0px' }}> Dateien hochladen</b>
-                        </button>
-                        <div className="error"></div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-
         </div>
+
+        {/* final files */}
+        <div className="div">
+          <div className="description">
+            <div className="row">
+              {/* local files */}
+              <div class="col-12">
+                <h3 className="">Dateien zum Download</h3>
+                {file && file.map((val) => {
+
+                  return !val.isLink && <div className="file-btn h-auto">
+                    <button className="downloadbtn p-2" style={{ height: '100%' }} type="button">
+                      <i className="bi bi-download icon user-i"></i>
+                      <a
+                        download={val.orignal_name}
+                        href={
+                          `${process.env.REACT_APP_IMG_URL}/assets/neworder/` +
+                          `${val.file}`
+                        }
+                        className="btn-text"
+                      >
+                        Download
+                      </a>
+                    </button>
+
+                    <button className="ms-2 deletebtn p-2" id={id}
+                      onClick={() => clickToDelete(val)}
+                      type="button">
+                      <i className="bi bi-trash icon user-i"></i>
+                      <span className="btn-text"> löschen </span>
+                    </button>
+                    <div className="align-items-center d-flex"><b className="ms-5">{val === null ? "" : `${val}` && `${val.orignal_name}`}</b></div>
+
+
+                  </div>
+                })}
+
+                <div className="img-previews">
+                  {filesValues.map((file, index) => (
+                    <div className="file-item" key={index}>
+                      {file.type.startsWith('image/') ?
+                        <img src={URL.createObjectURL(file)} alt="preview" style={{ height: "100px", width: "100px" }} title={file.name} />
+                        :
+                        <div className="d-flex flex-column" >
+                          <i class="bi bi-file-earmark-pdf-fill" title={file.name} ></i>
+                        </div>
+                      }
+                      <div className="cancle_icon" onClick={() => handleRemoveFiles(file)}>
+                        <i class="bi bi-x-circle-fill red_icon"></i>
+                      </div>
+                    </div>
+                  ))}
+
+                </div>
+                {
+                  filesValues.length > 0 ? <div className="ps-2" > <progress value={imageUploadProgress} max="100" />
+                    <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
+                }
+                <div className="order-field">
+                  <div className="file-area d-lg-flex ">
+                    <div className=" col-12 col-lg-9">
+                      <input
+                        type="file"
+                        id="orderfile"
+                        name="files[]"
+                        multiple="multiple"
+                        className="user-input"
+                        onChange={(event) => {
+                          setFilesValues(Array.from(event.target.files));
+                          const fileNames = Array.from(event.target.files).map(file => { return file.name });
+                          SetFilename(fileNames); // Set the original file names separated by commas
+
+                        }}
+                      />
+                      <div className="user-input profile-input">
+                        <div className="success">
+                          <i className="bi bi-image"></i>   Dateien hochladen
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div className="col-12 mt-2 mt-lg-0 col-lg-3">
+                      <button type="submit" className="justify-content-center d-flex login-btn ms-lg-2" style={{ width: "-webkit-fill-available" }} onClick={() => { AddFile() }}>
+                        <i className="bi bi-box-arrow-in-right icon" style={{ margin: 'auto 0px' }}></i>
+                        <b className="btn-text" style={{ margin: 'auto 0px' }}> Dateien hochladen</b>
+                      </button>
+                      <div className="error"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+      </div >
         <ToastContainer
           position="top-center"
           autoClose={5000}

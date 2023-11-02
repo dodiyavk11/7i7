@@ -1024,3 +1024,28 @@ exports.deletefile = async (req, res) => {
     res.status(404).json({ message: "File not found" });
   }
 };
+exports.revisisondeletefile = async (req, res) => {
+  // console.log(req);
+  
+  const { text } = req.body;
+  const folderPath = "./assets/revision_file";
+  
+  const resultString = text.join(', ');
+  const filePath = `${folderPath}/${resultString}`;
+  // console.log(foundFiles);
+  // console.log(filePath);
+  if (fs.existsSync(filePath)) {
+    // Delete the file
+    fs.unlinkSync(filePath);
+
+    // Remove the file name from the uploadedFileNames array (assuming you have one)
+    // const index = uploadedFileNames.findIndex((file) => file.fileName === fileName);
+    // if (index !== -1) {
+    //   uploadedFileNames.splice(index, 1);
+    // }
+
+    res.status(200).json({ message: "File deleted successfully" });
+  } else {
+    res.status(404).json({ message: "File not found" });
+  }
+};

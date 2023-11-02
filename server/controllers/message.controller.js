@@ -171,3 +171,63 @@ exports.deletefile = async (req, res) => {
     res.status(404).json({ message: "File not found" });
   }
 }
+
+exports.RevisionmessageSend = async (req, res) => {
+  // console.log(req.body);
+  try {
+    const uId = req.userId
+    const { order_id } = req.params
+    const { message } = req.body;
+    // const image = req.files;
+    const image = req.body.files;
+    // console.log(image);
+    const { files } = req.body;
+    // console.log(image);
+   if(!message && !image  ) return res.status(404).send({ status: false, message: "Bitte senden Sie eine Nachricht oder Datei", data: [] });
+
+    const getUserInfo = await Models.Users.findOne({ where: { id: uId } });
+    let chatData = { user_id: uId, order_id, role: getUserInfo.dataValues.role }
+
+    if (message || message !== "") { chatData.message = message }
+
+    // image add
+    if (files || files !== "") {
+     
+      if (image) {
+        
+        const filenames = image.map((file) => file.fileName);
+        const file_detail = image.map((file) => file.originalname);
+        // const array = await Promise.all(image.map(async (val) => {
+        //   return val.filename
+        // }))
+        let string = filenames.join(',');
+        chatData.files = string
+        chatData.files_original_name = file_detail?.join(",")
+      }
+    }
+
+    await Models.Order_Comment.create(chatData)
+
+    // change update status in order api, so that user and admin gets a red exclamation mark
+    getUserInfo.dataValues.role !== 0 && await Models.Orders.update({ update_status: 2 }, { where: { id: order_id } })
+    getUserInfo.dataValues.role === 0 && await Models.Orders.update({ update_status_admin: 2 }, { where: { id: order_id } })
+    await Models.Orders.update({ update_chat_status_admin: 2 }, { where: { id: order_id } })
+
+
+    const ordername = await Models.Orders.findOne({ where: { id: order_id } })
+    if (ordername) {
+      // Update the orderstatus to 2
+      await ordername.update({ orderstatus: 2 });
+    
+      // console.log(`Order with id ${order_id} has been updated to orderstatus 2.`);
+    } else {
+      console.log(`Order with id ${order_id} not found.`);
+    }
+   
+ res.status(200).send({ status: true, message: "Nachricht erfolgreich gesendet", data:req.files})
+          
+  } catch (err) {
+    console.log(err)
+    res.status(500).send({ status: false, message: "Nachricht kann nicht gesendet werden, da ist ein Fehler aufgetreten", data: [] ,error: err.message })
+  }
+}

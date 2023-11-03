@@ -92,7 +92,7 @@ const Employees = () => {
       message: 'Möchten Sie diesen Datensatz löschen?',
       buttons: [
         {
-          label: 'ja',
+          label: 'Ja',
           onClick: () => deletemp(id)
         },
         {

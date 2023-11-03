@@ -62,7 +62,7 @@ const Products = () => {
       message: 'Möchten Sie diesen Datensatz löschen?',
       buttons: [
         {
-          label: 'Ja',
+          label: 'Ne',
           onClick: () => deletproduct(id)
         },
         {

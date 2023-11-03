@@ -77,7 +77,7 @@
   justify-content: center;
 }
 
-.bi-file-earmark-pdf-fill {
+.bi-file-earmark-pdf-fill,.bi-file-earmark-play-fill,.bi-file-earmark-zip-fill {
   color: #C0DE60 !important;
   font-size: 81px;
 }
@@ -181,7 +181,7 @@ option {
 }
 
 .download-btn,
-.delete-btn, {
+.delete-btn {
   background-color: #C0DE6020;
   width: auto;
   display: inline-block;
@@ -203,7 +203,53 @@ option {
   font-size: 18px;
 
 }
+.revisionModal .modal-content {
+  background-color: #b2b9b91a;
+  padding: 0px 20px ;
+  /* border: 1px solid rgb(255 255 255); */
+}
+.revisionModal .modal-header {
+  border: none;
+  margin: 18px;
+  border-radius: 10px;
+  width: 95%;
+ 
+  /* padding: 21px; */
+  background: #222328;
+}
+.revisionModal .modal-header .modal-title{
+  display: flex;
+  margin-bottom: -12px;
+  line-height: 15px;
 
+}
+.revisionModal .bi-person-square::before {
+  line-height: 31px;
+
+}
+.modal-backdrop.show {
+  opacity: 0.9!important;
+}
+
+@media (min-width: 576px){
+  .modal-dialog {
+    max-width: 637px;
+    margin: 1.75rem auto;
+  }
+}
+
+.revisionModal .modal-footer {
+  border: none;
+}
+.revision-btn {
+  background-color: #da615c;
+  height: 40px;
+  border-radius: 5px;
+  padding-left: 1%;
+  padding-right: 1%;
+  font-size: 18px;
+
+}
 .delete-btn {
   background-color: rgb(134, 86, 75);
   margin-left: 1%;
@@ -493,15 +539,17 @@ p.chat_time span{
   }
 }
 @media screen and (max-width:992px) {
-
   .downloadbtn,
   .deletebtn,.editbtn {
     margin-top: 10px;
   }
+  .file-area.fileupload{
+    width: 10%;
+  }
 }
-@media screen and (min-width:993px) {
+@media screen and (min-width:992px) {
+  .file-btn.row{
+    height:auto;
+  } 
 
-  .file-btn {
-    height: auto;
-}
 }

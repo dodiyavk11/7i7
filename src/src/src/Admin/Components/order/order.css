@@ -1,0 +1,258 @@
+.main-body {
+  width: 80%;
+}
+.datatable{
+  height: auto;
+  width: 96%;
+  margin: 2% auto;
+  border-radius: 10px;
+  position: relative;
+  z-index: 1;
+}
+div#admin-dashboarddata{
+  border-top-left-radius:10px ;
+  border-top-right-radius: 10px ;
+}
+.order-header {
+  background-color: rgba(178, 185, 185, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  color: white !important;
+}
+
+.order-header h3 {
+  margin-left: 20px;
+  padding-top: 8px;
+  font-weight: 550;
+}
+
+.admin-lable {
+  display: inline;
+  font-size: 17px;
+  font-weight: 530;
+}
+
+.order-btn {
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 10px;
+  width: auto;
+  font-size: 20px;
+  background-color: #C0DE60; 
+  margin-left: auto;
+  font-weight: 500;
+  text-align: center;
+  color: white;
+  text-decoration: none;
+  border: none;
+}
+
+@media screen and (max-width:480px) {
+  .order-header h3 {
+    font-size: 15px !important;
+    margin-left: 10px !important;
+  }
+
+  .order-header .order-btn {
+    font-size: 10px !important;
+  }
+}
+
+.order-body {
+  background-color: rgba(178, 185, 185, 0.1);
+  height: auto;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+.select-option {
+  width: 100%;
+  background-color: rgba(178, 185, 185, 0.1);
+  padding: 3px;
+  height: 40px;
+  border-radius: 2px;
+  border: none;
+  outline: none;
+
+}
+
+.order-body option {
+  background-color: #353535;
+  height: inherit;
+}
+
+.admin-select * {
+  height: 50px;
+  border: 1px solid #DE6060;
+}
+
+.order-body .btn-src {
+  border: 1px solid;
+  border-radius: 3px;
+  background-color: #C0DE60;
+  width: auto;
+  padding: 10px !important;
+  margin-right: auto;
+  margin-left: 10px;
+  margin-top: 20px;
+  border: none;
+}
+
+.btn-src-link {
+  height: 100%;
+  width: auto;
+  color: white;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 550;
+}
+
+.order-content {
+  background-color: rgba(178, 185, 185, 0.1);
+  margin-top: 20px;
+  padding-top: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+.warninng{
+  font-size: 25px;
+  font-weight: bolder;
+  color: #DE6060;;
+}
+.abcd{
+  font-size: 25px;
+  font-weight: bolder;
+  color: #C0DE60
+}
+
+.order-content .table {
+  color: white !important;
+}
+
+.order-content td {
+  border: none !important;
+}
+
+
+.rdt_TableCol {
+  font-size: 18px;
+
+}
+
+.rdt_TableBody {
+  background: #41414200 !important;
+  padding: 5px 20px;
+}
+div#admin-dashboarddata > div > div > div > div > div {
+  background-color:rgba(178, 185, 185, 0.1) ;
+  cursor: pointer;
+  margin: 10px 0px;
+  /* border-radius: 2px; */
+}
+div#admin-dashboarddata > div > div > div > div {
+  background-color:rgba(178, 185, 185, 0.1)  !important;
+  cursor: pointer;
+  /* border-radius: 5px; */
+}
+.rdt_Table{
+  background-color: rgba(0, 0, 0, -0.5) !important;
+}
+.rdt_TableCell {
+  background-color: rgba(107, 104, 104, 0.158);
+  padding: 15px  5px;
+  }
+
+.rdt_TableHead{
+  padding: 5px 20px;
+}
+.rdt_TableBody{
+  padding: 5px 20px;
+}
+
+.rdt_Pagination{
+  background-color:rgba(178, 185, 185, 0.1) !important;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius:10px ;
+}
+.rdt_Pagination select {
+  color: white !important;
+}
+
+.hZUANu {
+  background: bottom !important;
+}
+ .eehlkp{
+  background-color:rgba(178, 185, 185, 0.1) !important;
+}
+
+
+/* ad */
+input[type="file"] {
+  display: block;
+}
+
+.imageThumb {
+  max-height: 75px;
+  border: 2px solid;
+  padding: 1px;
+  cursor: pointer;
+}
+
+.pip {
+  display: inline-block;
+  margin: 10px 10px 0 0;
+}
+
+.remove {
+  display: block;
+  background: #444;
+  border: 1px solid black;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: white;
+  color: black;
+}
+
+.img-previews {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.file-item {
+  margin-left: 10px;
+  position: relative;
+  cursor: pointer;
+}
+
+.cancle_icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.red_icon {
+  color: #DE6060;;
+}
+
+  /* progress bar */
+
+  progress {
+    width: 96% !important;
+    height: 12px !important;
+    background-color: #C0DE60;
+ }
+ progress::-webkit-progress-bar {
+    background-color: white;
+ }
+ progress::-webkit-progress-value {
+  background-color: #C0DE60;
+} 

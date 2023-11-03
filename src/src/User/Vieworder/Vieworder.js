@@ -20,6 +20,39 @@ export default function Vieworder() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const textareaRef = useRef();
+  const [orderfilechange, setorderFilechange] = useState([]);
+  const onchangeinputorder = (files) => {
+    // console.log(file);
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechange/`,
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "multipart/form-data",
+      },
+      data: {
+        "files": files,
+
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setImageUploadProgress(progress);
+      }
+
+    }).then((res) => {
+      // console.log(res.data.uploadedFileNames);
+      setorderFilechange(res.data.uploadedFileNames);
+
+    }).catch((err) => {
+
+    }).finally(() => {
+
+
+
+    })
+    // You can also perform additional actions, such as uploading the files to a server.
+    // Example: uploadFilesToServer(files);
+  };
   (function ($) {
     var CheckboxDropdown = function (el) {
       var _this = this;
@@ -117,6 +150,8 @@ export default function Vieworder() {
   const navigate = useNavigate();
   // get file
   const [file, setFile] = useState([])
+  const shouldRenderDiv = file.some(item => item.isLink === false);
+  const shouldRenderDiv1 = file.some(item => item.isLink === true);
   const GetFile = () => {
 
     axios({
@@ -232,19 +267,27 @@ export default function Vieworder() {
       Object.entries(values).forEach(([key, value]) => {
         formData.append(key, value);
       });
+      const filenames = [];
+      // console.log(orderfilechange);
+      // Iterate through the orderfilechange array using forEach
+
+      orderfilechange.forEach((file) => {
+        // Assuming each item in orderfilechange is an object with a 'filename' property
+        if (file.filename) {
+          filenames.push(file.fileName);
+        }
+      });
+
 
       axios({
         method: "PATCH",
         url: `${process.env.REACT_APP_BASE_URL}/order/update/${id}`,
-        data: { ...value, products: pdts, "files[]": fileValue, name: filename },
+        data: { ...value, products: pdts, "files": orderfilechange, filenames: orderfilechange },
         headers: {
           'content-type': 'multipart/form-data',
           'authorization': `Bearer ${token}`
         },
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setImageUploadProgress(progress);
-        },
+      
       })
         .then((res) => {
           // Handle success
@@ -294,10 +337,54 @@ export default function Vieworder() {
   const [imgevalue, setImageValue] = useState()
 
   const [chatImg, setChatImg] = useState([]);
+  const [chatonchange, setchatonchange] = useState([]);
 
   const handleRemoveImg = (file) => {
     const updatedFiles = chatImg && chatImg.filter((f) => f !== file);
     setChatImg(updatedFiles);
+    let chatonchange1 = [];
+    // setchatonchange([]);
+    // console.log(file);
+    // console.log(chatonchange);
+    const fileName = file.name;
+    const foundFiles = [];
+    // const foundFile = '';
+    // console.log(fileName);
+    chatonchange.forEach((file) => {
+      if (file.originalname === fileName) {
+        // Perform an action for the file with a matching originalname
+        // console.log("Found File:", file.fileName);
+        foundFiles.push(file.fileName);
+        // Add your custom logic here for the found file
+      }
+    });
+  
+
+    axios({
+      method: 'post', 
+      url: `${process.env.REACT_APP_BASE_URL}/message/filechangedelete/${id}`,
+      headers: {
+        'authorization': `Bearer ${token}`
+      },
+      data: { text: foundFiles }
+    })
+      .then((res) => {
+        // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
+        // console.log(res);
+        // fetchChatData();
+        // setEditDisabled(false);
+        // console.log(chatonchange);
+          // Remove the found files from chatonchange
+        setchatonchange(chatonchange.filter((file) => file.originalname !== fileName));
+
+    
+        // chatonchange1 = [];
+      }).catch((res) => {
+        // toast.error(res.response.message)
+      })
+      .finally(() => {
+        // setIsLoading(false); // Stop loading, whether success or error
+      });
   };
   const handleImagech = (event, file) => {
     const reader = new FileReader();
@@ -307,7 +394,44 @@ export default function Vieworder() {
     };
     reader.readAsDataURL(file);
   };
- 
+  const onchangeinput = (files) => {
+    // You can perform any operations you want with the selected files here.
+    // For example, you can update the state to store the selected files.
+    // console.log(files);
+    // setSelectedFiles(files);
+    setchatonchange([]);
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/message/filechange/${id}`,
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "multipart/form-data",
+      },
+      data: {
+        
+        // file_detail: imgNames,
+        "files": files,
+
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setImageUploadProgress(progress);
+      }
+   
+    }).then((res) => {
+      console.log(res.data.uploadedFileNames);
+      setchatonchange(res.data.uploadedFileNames);
+
+    }).catch((err) => {
+      
+    }).finally(() => {
+
+
+     
+    })
+    // You can also perform additional actions, such as uploading the files to a server.
+    // Example: uploadFilesToServer(files);
+  };
 
 
 
@@ -335,7 +459,8 @@ export default function Vieworder() {
       data: {
         message: message,
         file_detail: imgNames,
-        "files": chatImg
+        "files": chatImg,
+        "image": chatonchange,
       },
       onUploadProgress: (progressEvent) => {
         const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -347,7 +472,8 @@ export default function Vieworder() {
       setMessage('')
       fileInputRef.current.value = '';
       scrollToBottom();
-      setChatImg([])
+      setChatImg([]);
+       setchatonchange([]);
     }).catch((err) => {
       toast.error(err.response.data.message)
 
@@ -364,17 +490,17 @@ export default function Vieworder() {
   useEffect(() => {
     // Initialize a counter
     let counter = 0;
-  
+
     // Scroll to the bottom of the chat box if it exists
     const scrollToBottomIfAvailable = () => {
       if (chatBoxRef.current) {
         chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
       }
     };
-  
+
     // Scroll to the bottom on component mount
     scrollToBottomIfAvailable();
-  
+
     // Set up the interval
     const chatBoxInterval = setInterval(() => {
       // Check if the counter has reached 2
@@ -386,7 +512,7 @@ export default function Vieworder() {
         clearInterval(chatBoxInterval);
       }
     }, 1000); // Adjust the interval as needed
-  
+
     return () => {
       // console.log('Cleanup function called');
       clearInterval(chatBoxInterval); // Cleanup the interval when the component unmounts
@@ -440,6 +566,44 @@ export default function Vieworder() {
   const handleRemoveFile = (file) => {
     const updatedFiles = fileValue.filter((f) => f !== file);
     setFileValue(updatedFiles);
+    const fileName = file.name;
+    const foundFiles = [];
+    // const foundFile = '';
+    // console.log(fileName);
+    orderfilechange.forEach((file) => {
+      if (file.originalname === fileName) {
+        // Perform an action for the file with a matching originalname
+        // console.log("Found File:", file.fileName);
+        foundFiles.push(file.fileName);
+        // Add your custom logic here for the found file
+      }
+    });
+    axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechangedelete/`,
+      headers: {
+        'authorization': `Bearer ${token}`
+      },
+      data: { text: foundFiles }
+    })
+      .then((res) => {
+        // toast.success(res.data.message, { toastId: "unique-random-text-xAu9C9-" });
+        // console.log(res);
+        // console.log("deletFile");
+        // fetchChatData();
+        // setEditDisabled(false);
+        // console.log(chatonchange);
+        // Remove the found files from chatonchange
+        setorderFilechange(orderfilechange.filter((file) => file.originalname !== fileName));
+
+
+        // chatonchange1 = [];
+      }).catch((res) => {
+        // toast.error(res.response.message)
+      })
+      .finally(() => {
+        // setIsLoading(false); // Stop loading, whether success or error
+      });
   };
 
   const handleImageChange = (event, file) => {
@@ -518,23 +682,23 @@ export default function Vieworder() {
     })
   }
 
-   // emoji part
-   const [showEmoji, setShowEmoji] = useState(false)
+  // emoji part
+  const [showEmoji, setShowEmoji] = useState(false)
 
 
-   const handleInsertEmoji = (emoji) => {
-     const textarea = document.getElementById('messageInput1');
-     const start = textarea.selectionStart;
-     const end = textarea.selectionEnd;
- 
-     const updatedMessage = message.substring(0, start) + emoji + message.substring(end);
- 
-     setMessage(updatedMessage);
-     // Place the cursor after the inserted text
-     // textarea.selectionStart = start + emoji.length;
-     // textarea.selectionEnd = start + emoji.length;
-     // textarea.focus();
-   };
+  const handleInsertEmoji = (emoji) => {
+    const textarea = document.getElementById('messageInput1');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    const updatedMessage = message.substring(0, start) + emoji + message.substring(end);
+
+    setMessage(updatedMessage);
+    // Place the cursor after the inserted text
+    // textarea.selectionStart = start + emoji.length;
+    // textarea.selectionEnd = start + emoji.length;
+    // textarea.focus();
+  };
 
 
   if (error) {
@@ -631,14 +795,18 @@ export default function Vieworder() {
                       name="files[]"
                       multiple="multiple"
                       className="user-input"
-                      onChange={(event) => {
+                      onChange={(event) => {                       
                         const files = Array.from(event.target.files);
+                        setFileValue(files);
+                     
+                        onchangeinputorder(files);
                         files.forEach((file) => {
                           handleImageChange(event, file);
                         });
-                        setFileValue(files);
+                        
                         const fileNames = Array.from(event.target.files).map(file => { return file.name });
-                        SetFilename(fileNames); // Set the original file names separated by commas
+                        SetFilename(fileNames);
+                      
                       }}
                     />
                     <div className="user-input profile-input">
@@ -676,7 +844,7 @@ export default function Vieworder() {
 
                 {getfiles && getfiles.map((val) => {
 
-                  return <div className="file-btn">
+                  return <div className="file-btn d-block align-content-center">
 
                     <button className="downloadbtn" type="button"
                     >
@@ -766,18 +934,18 @@ export default function Vieworder() {
 
                       {val.role === 0 ?
                         <React.Fragment>
-                          <div className="col-md-1 view-order-img">
+                          <div className=" col-md-1 view-order-img">
                             {/* <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/${val.userImg}`} alt="profile" /> */}
                             {val.userImg ? <img className="msg-profile" src={`${process.env.REACT_APP_IMG_URL}/assets/profilepic/` + `${val.userImg}`} /> : <div style={{ height: "50px", width: "50px", borderRadius: "50%", background: "grey" }}></div>}
                           </div>
-                          <div className="col-7 col-sm-7 col-md-7 col-lg-7">
-                            <div className="chat-box-one">
+                          <div className="chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
+                            <div className="chat-box-one u1 pt-0">
 
                               <p className="chat-date d-flex justify-content-between">
-                                <div> {val.name} <span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
+                                <div> <span style={{ color: '#ffd279' }}> {val.name}</span>  <span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                 <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i>
                               </p>
-                              <p style={{ whiteSpace: "break-spaces" }}>
+                              <p style={{ whiteSpace: "break-spaces" ,wordBreak: 'break-word'  }}>
 
                                 {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
@@ -798,13 +966,17 @@ export default function Vieworder() {
                         </React.Fragment>
                         :
                         <React.Fragment>
-                          <div className="col-7 col-sm-7 col-md-7 col-lg-7">
-                            <div className="chat-box-two">
+                          <div className="chat-msg col-7 col-sm-7 col-md-7 col-lg-7">
+                            <div className="chat-box-two u2 pt-0">
                               <p className="chat-date d-flex justify-content-between">
-                                <div> {val.name} <span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
+                                <div>{val.role === 2 ? (
+                                    <span style={{ color: '#53bdeb' }}>{val.name}</span>
+                                  ) : (
+                                    <span style={{ color: '#C0DE60' }}>{val.name}</span>
+                                  )}<span className="ps-2">{moment(val.createdAt).format("DD.MM.YYYY")}</span> </div>
                                 {/* <i className="bi bi-trash icon user-i fs-6" onClick={() => confirmDeleteMessage(val)} style={{ cursor: "pointer" }}></i> */}
                               </p>
-                              <p style={{ whiteSpace: "break-spaces" }}>
+                              <p style={{ whiteSpace: "break-spaces" ,wordBreak: 'break-word' }}>
 
                                 {(val.message && val.files == '') && (val.message && val.message != null && val.message.toString()) ||
 
@@ -855,40 +1027,49 @@ export default function Vieworder() {
               </div>
 
               {
-                chatImg.length > 0 ? <div className="ps-2"> <progress value={imageUploadProgress} max="100" />
+                chatImg.length > 0 ? <div className="ps-2" style={{ width: `${100 * chatImg.length}px` }}> <progress value={imageUploadProgress} max="100" />
                   <span className="ps-2">{`${imageUploadProgress}%`}</span></div> : ""
               }
 
 
               <div className="row pt-2 pb-2 position-relative">
-                 {/* emoji */}
-                 <button className="col-lg-1" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
-                  <i className="bi bi-emoji-smile fs-5"></i>
-                </button>
-                {
-                  showEmoji && <div class="emoji-wrapper">
-                    <EmojiPicker onEmojiClick={(emojiData, event) => {
-                      handleInsertEmoji(emojiData.emoji)
-                      // setMessage((oldVal) => oldVal + emojiData.emoji)
-                    }}
-                      theme="dark"
-                      emojiStyle="google"
-                    />
-                  </div>
-                }
-                 <div className="col-lg-1 " style={{ width: '3.33%' }}>
-                  <div className="order-field1">
 
-                    <div className="file-area ">
+                <div className="col-lg-1  emoji_file">
+                  <div className="order-field1 d-flex">
+
+
+                    {/* emoji */}
+                    {
+                      showEmoji &&
+                    <button className="col-lg-1 me-2" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
+                      <i className="bi bi-x-lg fs-5"></i>
+                    </button>
+                        }
+                    <button className="col-lg-1" style={{ all: "unset", cursor: "pointer" }} onClick={() => setShowEmoji(oldVal => !oldVal)}>
+                      <i className="bi bi-emoji-smile fs-5"></i>
+                    </button>
+                    {
+                      showEmoji && <div class="emoji-wrapper">
+                        <EmojiPicker onEmojiClick={(emojiData, event) => {
+                          handleInsertEmoji(emojiData.emoji)
+                          // setMessage((oldVal) => oldVal + emojiData.emoji)
+                        }}
+                          theme="dark"
+                          emojiStyle="google"
+                        />
+                      </div>
+                    }
+                    <div className="file-area fileupload">
                       <input
                         type="file"
                         id="orderfile"
                         name="files"
                         className="user-input"
-                        style={{ background: 'transparent',cursor:'pointer' }}
+                        style={{ background: 'transparent', cursor: 'pointer' }}
                         ref={fileInputRef}
                         onChange={(event) => {
                           const files = Array.from(event.target.files);
+                          onchangeinput(files);
                           files.forEach((file) => {
                             handleImagech(event, file);
                           });
@@ -897,9 +1078,9 @@ export default function Vieworder() {
                         multiple
                       />
 
-                      <div className="user-input profile-input" style={{ background: 'transparent' ,cursor:'pointer'}}>
+                      <div className="user-input profile-input" style={{ background: 'transparent', cursor: 'pointer' }}>
                         <div className="success">
-                          <i className="bi bi-paperclip h4" style={{ verticalAlign: '-webkit-baseline-middle',cursor:'pointer' }}></i>
+                          <i className="bi bi-paperclip h4" style={{ verticalAlign: '-webkit-baseline-middle', cursor: 'pointer' }}></i>
                         </div>
                       </div>
                     </div>
@@ -910,18 +1091,19 @@ export default function Vieworder() {
                   <textarea
                     type="text"
                     placeholder="Deine Nachricht an den Designer..."
-                    className="user-input"
+                    className="form-control user-input"
                     value={message}
                     name="message"
                     onChange={(e) => setMessage(e.target.value)}
                     id="messageInput1"
                     required
                     ref={textareaRef}
+                    style={{minHeight:'42px'}}
                   ></textarea>
                 </div>
-               {/* send message */}
-                <div className="col-lg-1">
-                  <button type="button" className="chat-btn  d-flex align-items-center px-2" onClick={sendText}>
+                {/* send message */}
+                <div className="col-lg-2">
+                  <button type="button" className="chat-btn  d-flex align-items-center justify-content-center px-2" onClick={sendText} style={{ width: '100%' }}>
 
                     <i class="bi bi-send-fill"></i>
                     <b className="btn-text">Senden</b>
@@ -935,7 +1117,7 @@ export default function Vieworder() {
           </div>
 
           {/* cloud files */}
-          <div className="div">
+          {shouldRenderDiv1 ? (    <div className="div">
             <div className="description">
               <div className="row">
                 <div className="col-12">
@@ -944,7 +1126,7 @@ export default function Vieworder() {
                   {/* show cloud links */}
                   {file && file.map((val) => {
                     return val.isLink &&
-                      (<div className="file-btn">
+                      (<div className="file-btn link1">
                         <button className="downloadbtn cloud-link-download-btn" type="button">
                           <i className="bi bi-download icon user-i"></i>
                           <a
@@ -969,10 +1151,11 @@ export default function Vieworder() {
                 </div>
               </div>
             </div>
-          </div>
+          </div>):(<div></div>)}
+      
 
           {/* local files */}
-          <div className="div">
+          {shouldRenderDiv ? ( <div className="div">
             <div className="description">
               <div className="row">
                 <div class="col-12">
@@ -980,7 +1163,7 @@ export default function Vieworder() {
                   <h3 className="">Dateien zum Download</h3>
                   {
                     file && file.map((val) => {
-                      return !val.isLink && <div className="file-btn">
+                      return !val.isLink && <div className="file-btn align-content-center">
                         <button className="downloadbtn" type="button">
                           <i className="bi bi-download icon user-i"></i>
                           <a
@@ -1005,8 +1188,11 @@ export default function Vieworder() {
                           <i className="bi bi-trash icon user-i"></i>
                           <a className="btn-text"> löschen </a>
                         </button> */}
+                        <div className="justify-content-center  d-flex" style={{margin:'auto 0px'}}>
                         <b className="ms-5">{val.file === null ? "" : `${val.orignal_name}` && `${val.orignal_name}`}</b>
                         {fileValue && <b className="ms-5">{fileValue.name}</b>}
+                        </div>
+                       
                       </div>
                     })
                   }
@@ -1015,7 +1201,8 @@ export default function Vieworder() {
 
               </div>
             </div>
-          </div>
+          </div>): (<div></div>)}
+         
 
 
 

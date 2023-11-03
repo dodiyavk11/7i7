@@ -45,12 +45,13 @@ module.exports = (app) => {
   app.post("/order/get/:id", [checkAuth], GetOrderByOrderId)
   app.patch("/order/update/:orderId", [checkAuth, upload.array("files[]",999999)], UpdateOrder);
 
-  app.post("/order/filechange/:id", Imgupload1.array("files[]", 999999), (req, res) => {
+  app.post("/order/filechange/", Imgupload1.array("files[]", 999999), (req, res) => {
     // console.log(req);
     res.json({ uploadedFileNames });
     uploadedFileNames = [];
   });
-   app.post("/order/filechangedelete/:id", [checkAuth], deletefile);
+ 
+   app.post("/order/filechangedelete/", [checkAuth], deletefile);
 
 
   app.post("/order/file_delete", [checkAuth], DeleteOrderFile);

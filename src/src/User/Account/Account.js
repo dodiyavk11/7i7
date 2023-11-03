@@ -50,7 +50,7 @@ export default function Account() {
   const [data, setData] = useState([]);
   const [link, setLink] = useState();
 
-  const getuser = () => {
+  const getuser = () => { 
     axios({
       method: "POST",
       url: `${process.env.REACT_APP_BASE_URL}/account/user/profile`,
@@ -832,7 +832,12 @@ export default function Account() {
                               placeholder="Write your E-Mail."
                               className="user-input"
                               onChange={(event) => {
-                                setFieldValue("file", event.target.files[0]);
+                                const selectedFile = event.target.files[0];
+
+                                // You can add validation here, e.g., checking file type, size, etc.
+                                // If validation fails, you can set an error message in the 'errors1' state.
+                            
+                                setData({ ...data, file: selectedFile });
                               }}
                             />
                             <div className="user-input profile-input">

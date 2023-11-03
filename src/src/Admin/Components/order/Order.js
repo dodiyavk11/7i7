@@ -8,6 +8,7 @@ import { useFormik } from "formik";
 import styled from "styled-components";
 import moment from "moment";
 import { confirmAlert } from "react-confirm-alert";
+// import { getByTitle } from "@testing-library/react";
 
 const StyledCell = styled.div`
 
@@ -43,10 +44,19 @@ function getPriorityClass(orderpriority) {
   else if (orderpriority == 0) return "Standard";
 
 }
+
 function getStatusClass(orderstatus) {
   if (orderstatus == 1) return "Neuer Auftrag";
   else if (orderstatus == 2) return "Wird bearbeitet";
   else if (orderstatus == 3) return "Abgeschlossen"
+  return "low";
+}
+function getByTitle(title,orderstatus) {
+  if (orderstatus == 1) {
+    return title;
+  }
+  else if (orderstatus == 2) return title;
+  else if (orderstatus == 3) return title;
   return "low";
 }
 function updatestatus(update_status_admin) {
@@ -74,6 +84,15 @@ const Order = () => {
         </StyledCell>
       ),
       width: "2%",
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
     },
     {
       name: 'Priorität',
@@ -83,16 +102,43 @@ const Order = () => {
           {getPriorityClass(row.orderpriority)}
         </StyledCell>
       ),
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
 
     },
     {
       name: 'Kunde',
       selector: row => row.customerName.map((val) => { return val.company }),
       sortable: true,
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
     },
     {
       name: 'Titel',
       selector: row => row.ordername,
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
       sortable: true,
     },
     {
@@ -107,26 +153,63 @@ const Order = () => {
           </div>
         )
       }),
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
       sortable: true,
     },
     {
       name: 'Nr.',
       selector: row => row.id,
       sortable: true,
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
     },
     {
       name: 'Datum',
       selector: row => row.createdAt,
       format: (row) => moment(row.createdAt).format("DD.MM.YYYY"),
       sortable: true,
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
     },
     {
       name: 'Status',
       sortable: true,
+      sortFunction: (a, b) => {
+        // Customize the sort function based on your criteria
+        // For example, sort alphabetically if orderstatus is not 3
+        if (a.orderstatus !== 3 && b.orderstatus !== 3) {
+          return a.ordername.localeCompare(b.ordername);
+        }
+        // For other cases (orderstatus is 3), maintain the existing order
+        return 0;
+      },
       cell: (row) => (
         <StyledCell className={getStatusClass(row.orderstatus)}>
           {getStatusClass(row.orderstatus)}
         </StyledCell>),
+      
     },
     {
       name: 'Aktion',
@@ -147,7 +230,8 @@ const Order = () => {
   const [customerdata, setCustomerdata] = useState([])
   const [empname, setEmpname] = useState()
   const navigate = useNavigate()
-
+  console.log(orderdata);
+  
   useEffect(() => {
     // employee api
     axios({
@@ -320,7 +404,6 @@ let initialValues;
 
     return (
       <>
-
         <div className="main-body" id="root1">
           <div className="order-header d-flex div">
             <i className="bi bi-binoculars i fs-2"></i>
@@ -329,7 +412,6 @@ let initialValues;
               <i class="bi bi-plus-square pe-2"></i>Neuer Auftrag
             </Link>
           </div>
-
           <div className="order-body div">
             <form action="" onSubmit={handleSubmit}>
               <div className="container">

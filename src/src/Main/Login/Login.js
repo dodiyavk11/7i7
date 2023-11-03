@@ -155,7 +155,7 @@ const Login = () => {
           <div className="field">
             <button className=" mt-3 login-btn" type="btn" >
             {isLoading ? (
-                                <span><i className="bi bi-hourglass-split icon pe-1"></i>Wird beärbeitet...</span> // Replace with your loader icon
+                                <span><i className="bi bi-hourglass-split icon pe-1"></i>Wird bearbeitet…</span> // Replace with your loader icon
                             ) : (
                                 <>
                                 <i className="bi bi-box-arrow-in-right "> </i>
@@ -166,9 +166,9 @@ const Login = () => {
             </button>
           </div>
 
-          <p className="text-cente pt-2">
+          {/* <p className="text-cente pt-2">
           oder <br/> <Link to="registration" className="user-newaccount"><small className="user-newaccount">erstelle einen Neuer Account</small> </Link>
-          </p>
+          </p> */}
           <div className="field">
           </div>
 

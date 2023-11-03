@@ -125,7 +125,7 @@
 
 .deletebtn {
   background-color: #DE606020;
-
+  padding: 0.5rem!important;
 
 }
 .display-contents {
@@ -203,8 +203,8 @@
   border-top: 10px solid #005c4b;
   border-bottom: 10px solid transparent;
   position: relative;
-  bottom: 10px;
-  left: -2%;
+  bottom: 0px;
+  left: -3%;
 }
 
 .chat-box-two.u2{
@@ -224,6 +224,18 @@
   border-top: 10px solid #202c33;
   border-bottom: 10px solid transparent;
   position: relative;
-  bottom: 10px;
+  bottom: 0px;
   left: 100%;
+}
+.chat-msg.col-7.col-sm-7.col-md-7.col-lg-7{
+  width: auto;
+  max-width: 58.33333333%;
+}
+@media screen and (max-width:992px) {
+  .file-btn.link1 {
+    margin: 0px 0 0px 1px;
+  }
+  .file-area.fileupload{
+    width: 10%;
+  }
 }

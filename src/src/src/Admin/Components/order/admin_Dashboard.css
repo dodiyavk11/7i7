@@ -1,0 +1,61 @@
+.admin-dashboard {
+  font-size: 20px;
+  width: 100%;
+}
+
+.admin-small-button {
+  border: none;
+  border-radius: 5px;
+}
+
+.admin-small .admin-small-button {
+  background-color: rgba(147, 198, 43, 0.2);
+}
+
+.admin-btn-text {
+  text-decoration: none;
+  color: white;
+}
+
+.admin-status-btn {
+  border: none;
+  color: white;
+  padding: 5px 40px;
+  margin-right: 10px;
+  border-radius: 5px;
+  background-color: rgba(147, 198, 43, 0.2);
+}
+
+.admin-big {
+  width: 40%;
+
+}
+
+.admin-small {
+  width: 30%;
+}
+
+.admin-dashboard-title {
+  padding: 2% 0% 0% 4%;
+}
+
+.admin-big {
+  width: 40%;
+}
+
+#admin-dashboarddata {
+  height: auto;
+  padding-bottom: 20px;
+}
+
+.admin-small-button {
+  width: 50%;
+  padding: 2% 0%;
+}
+
+.admin-dashboard-field {
+  padding: 1% 2% 1% 2%;
+  margin: 1% 2% 0% 1%;
+  background-color: rgba(178, 185, 185, 0.1);
+  align-items: center;
+}

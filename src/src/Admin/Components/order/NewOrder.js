@@ -152,7 +152,7 @@ export default function NewOrder() {
 
   };
 
-
+  const [orderfilechange, setorderFilechange] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const getRole = localStorage.getItem("role")
   const [imageUploadProgress, setImageUploadProgress] = useState(0);
@@ -177,15 +177,12 @@ export default function NewOrder() {
       axios({
         method: 'POST',
         url: `${process.env.REACT_APP_BASE_URL}/order/add`,
-        data: { ...data, "files[]": fileValue, employee: emp, uId: ids, name: filename },
+        data: { ...data, employee: emp, uId: ids, "files": orderfilechange, filenames: orderfilechange},
         headers: {
           "content-type": "multipart/form-data",
           'authorization': `Bearer ${token}`
         },
-        onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setImageUploadProgress(progress);
-        },
+       
       })
         .then((res) => {
           setTimeout(() => {
@@ -220,6 +217,36 @@ export default function NewOrder() {
   const handleRemoveFile = (file) => {
     const updatedFiles = fileValue.filter((f) => f !== file);
     setFileValue(updatedFiles);
+    const fileName = file.name;
+    const foundFiles = [];
+ 
+    orderfilechange.forEach((file) => {
+      if (file.originalname === fileName) {
+       
+        foundFiles.push(file.fileName);
+       
+      }
+    });
+    axios({
+      method: 'post',
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechangedelete/`,
+      headers: {
+        'authorization': `Bearer ${token}`
+      },
+      data: { text: foundFiles }
+    })
+      .then((res) => {
+        
+        setorderFilechange(orderfilechange.filter((file) => file.originalname !== fileName));
+
+
+        // chatonchange1 = [];
+      }).catch((res) => {
+        // toast.error(res.response.message)
+      })
+      .finally(() => {
+        // setIsLoading(false); // Stop loading, whether success or error
+      });
   };
 
   const handleImageChange = (event, file) => {
@@ -250,6 +277,38 @@ export default function NewOrder() {
         toast.error(res.data.message)
       })
   }
+  const onchangeinputorder = (files) => {
+    // console.log(file);
+    axios({
+      method: "POST",
+      url: `${process.env.REACT_APP_BASE_URL}/order/filechange/`,
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "multipart/form-data",
+      },
+      data: {
+        "files": files,
+
+      },
+      onUploadProgress: (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        setImageUploadProgress(progress);
+      }
+
+    }).then((res) => {
+      // console.log(res.data.uploadedFileNames);
+      setorderFilechange(res.data.uploadedFileNames);
+
+    }).catch((err) => {
+
+    }).finally(() => {
+
+
+
+    })
+    // You can also perform additional actions, such as uploading the files to a server.
+    // Example: uploadFilesToServer(files);
+  };
 
   return (
     <>
@@ -426,12 +485,15 @@ export default function NewOrder() {
                     className="user-input"
                     onChange={(event) => {
                       const files = Array.from(event.target.files);
-                      files.forEach((file) => {
-                        handleImageChange(event, file);
-                      });
-                      setFileValue(files);
-                      const fileNames = Array.from(event.target.files).map(file => { return file.name });
-                      SetFilename(fileNames); // Set the original file names separated by commas
+                          setFileValue(files);
+                       
+                          onchangeinputorder(files);
+                          files.forEach((file) => {
+                            handleImageChange(event, file);
+                          });
+                          
+                          const fileNames = Array.from(event.target.files).map(file => { return file.name });
+                          SetFilename(fileNames);
                     }}
                   />
                   <div className="user-input profile-input">

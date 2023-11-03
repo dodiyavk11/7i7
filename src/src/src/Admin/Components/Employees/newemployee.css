@@ -1,0 +1,72 @@
+.newemployee-header{
+    background-color: rgba(178, 185, 185, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    color: white !important;
+}
+
+.newemployee-header img{
+    border-radius: 50%;
+    height: 50px !important;
+    width: 50px !important;
+}
+.newemployee-header input:not([type="checkbox"]){  
+    height: 40px;
+    background-color: rgba(178, 185, 185, 0.1);
+    margin-top: 5px;
+    color: white !important;
+    margin-left: 7px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}
+
+.newemployee-btn{
+    border: 1px solid;
+    border-radius: 5px;
+    padding: 10px;
+    /* width: 18% !important; */
+    width: auto;
+    font-size: 20px;
+    background-color:rgb(174,235 ,74);
+    margin-left: auto;
+    font-weight: 500;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+}
+@media screen and (max-width:768px){
+    .newemployee-header{
+        flex-direction: column;
+    }
+    .newemployee-btn{
+       text-align: center;  
+}
+.lname{
+    margin-left:0px;
+}
+}
+::placeholder{
+    color: white;
+    font-size: small;
+    /* padding: 20px !important; */
+}
+
+.newemployee-body{
+    background-color: rgba(178, 185, 185, 0.1);
+    height: auto;
+    margin-top: 20px;
+    /* padding-top: 20px; */
+    /* padding-bottom: 50px; */
+    border-radius: 10px;
+    color: white;
+}
+.newemployee-body input:not([type="checkbox"]){
+    width: 100%;
+    height: 40px;
+    background-color: rgba(178, 185, 185, 0.1);
+    border-radius: 5px;
+    border: none;
+    outline: none;
+}

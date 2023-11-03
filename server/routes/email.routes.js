@@ -14,6 +14,4 @@ module.exports = (app) =>{
     app.patch("/send/chat/:id", [checkAuth, isAdmin], UpdatechatContent);
     app.patch("/add/chat", [checkAuth, isAdmin], AddchatContent);
     app.post("/delete/chat/:id", [checkAuth, isAdmin], DeletechatContent);
-    
-    
 }

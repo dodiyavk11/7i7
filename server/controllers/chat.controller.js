@@ -51,6 +51,7 @@ exports.UpdatechatContent = async (req, res) => {
 }
 // add content in email template
 exports.AddchatContent = async (req, res) => {
+    // console.log(req.body);
     try {
         // const { id } = req.params;
         const { text } = req.body;

@@ -1,0 +1,161 @@
+  .accordian-btn {
+    width: auto;
+    background-color: transparent;
+  }
+
+  .event-p {
+    font-size: 16px;
+    /* padding: 10px 10px; */
+  }
+
+  .accordion {
+    --bs-accordion-border-width: 0px !important;
+  }
+
+  img:focus {
+    height: 300px;
+    width: 300px;
+    transform: scale(3);
+  }
+
+  .user-accordion-body {
+    background-color: rgba(181, 189, 189, 0.08);
+
+    padding: 5px 10px;
+    width: 96%;
+    margin: 1% auto;
+
+  }
+
+  .Accepted {
+    width: 80%;
+  }
+
+  .Accepted::before {
+    content: '\2713';
+    float: left;
+    padding-left: 15px;
+  }
+
+  .products {
+    margin: 20px;
+    padding: 0;
+    list-style-type: none;
+
+    gap: 20px;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .products__single {
+    height: 250px;
+    list-style: none;
+    padding: 20px;
+    background-color: rgb(220, 220, 220);
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .products__single>img {
+    width: 100%;
+    height: 95%;
+    object-fit: cover;
+    margin-bottom: 3px;
+  }
+
+  .pagination {
+    padding: 10px;
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .pagination>span {
+    padding: 5px 10px !important;
+
+    cursor: pointer;
+  }
+
+  .pagination__disable {
+    opacity: 1;
+  }
+
+  .pagination__selected {
+    border: 1px solid grey !important;
+  }
+
+  .user-event-header {
+    border-bottom: 1px solid grey;
+    width: 98%;
+    margin: auto;
+  }
+
+  .user-event-box {
+    margin-top: 1%;
+
+  }
+
+  .user-accordian {
+
+    margin-top: 20px;
+    border: none;
+    outline: none;
+    padding: 1% 0%;
+    background-color: rgba(178, 185, 185, 0.1);
+    border-radius: 5px;
+
+
+  }
+
+  .user-event-dis {
+    width: 100%;
+    margin: auto;
+  }
+
+  .accordion-button:not(.collapsed) {
+    color: none;
+    background-color: transparent;
+  }
+
+  .accordion-button:focus {
+    border-color: none;
+    outline: 0;
+    box-shadow: 0;
+  }
+
+  .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e")
+  }
+
+  .event-para {
+    font-size: 16px;
+
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+  }
+
+
+
+  @media screen and (max-width:1225px) {
+    .scroll-events {
+      overflow-x: scroll !important;
+    }
+
+    .child-scroll {
+      width: 1100px !important;
+    }
+
+  }
+
+
+  .sidebox {
+    position: relative;
+  }
+
+  .delete_photo {
+    position: absolute;
+    right: 0;
+  }

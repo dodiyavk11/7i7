@@ -14,8 +14,6 @@ import { SlideshowLightbox } from "lightbox.js-react";
 const AdminEvent = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
-
-
   const [customername, setCustomerName] = useState([])
   const [customervalues, setCutomerValues] = useState([])
   const [acceptdate, setAcceptDate] = useState([])
@@ -184,8 +182,9 @@ const AdminEvent = () => {
 
 
   // fatch images
-  const [images, setImages] = useState([])
+  const [images, setImages] = useState([]);
   const fatchImages = (id) => {
+    setImages([]);
     axios({
       method: "POST",
       url: `${process.env.REACT_APP_BASE_URL}/fetch/images`,
@@ -370,7 +369,7 @@ const AdminEvent = () => {
     setAcceptDate()
     setCutomerValues()
     setProfile()
-    loadPdf(e.id)
+    // loadPdf(e.id)
   }
 
   // file add
@@ -485,10 +484,12 @@ const AdminEvent = () => {
                             </h2>
                             <div
                               id={`abc${e.id}`}
+                            
                               className="accordion-collapse collapse "
                               data-parent={`#abc${e.id}`}
                               aria-labelledby={`heading${e.id}`}
                               data-bs-parent="#accordionExample"
+                             
                             >
                               <div className="admin-accordion-body">
                                 <div className="event-details">
@@ -496,8 +497,8 @@ const AdminEvent = () => {
                                   <div className="d-flex ">
                                     {images && images.map((val) => {
 
-                                      return <div className="sidebox">
-                                        <div className="delete_photo" onClick={() => imgdelete(val)}> <i class="fa-solid fa-trash mx-1"></i></div>
+                                      return <div className="sidebox" onClick={() => imgdelete(val)}>
+                                        <div className="delete_photo"> <i class="fa-solid fa-trash mx-1"></i></div>
                                         <SlideshowLightbox className="container grid grid-cols-3 gap-2 mx-auto  ">
                                           <img src={`${process.env.REACT_APP_IMG_URL}/assets/event_image/${val}`} style={{ height: "100px", width: "100px", marginLeft: "5px" }} />
                                         </SlideshowLightbox>
@@ -645,6 +646,7 @@ const AdminEvent = () => {
                         name="files[]"
                         multiple="multiple"
                         className="user-input"
+                        accept="image/*"
                         onChange={(event) => {
                           const files = Array.from(event.target.files);
                           files.forEach((file) => {
